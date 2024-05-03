@@ -106,10 +106,24 @@ class PaintWidget(BoxLayout):
         
         
         print("縦:" + str(image_shape[0]))
+        fix_y = abs(int(y) - image_shape[0])
         print("横:" + str(image_shape[1]))
+        
+        print(int(fix_y))
         print(int(x))
-        print(int(y))
-        #print(bgr_array[int(x), int(y), :])
+        print(bgr_array[int(fix_y), int(x), :])
+        
+        print(int(x),int(fix_y))
+        
+        """
+        fix_y が縦軸
+        x が横軸
+        """
+        gbr_temp_list = []
+        for i in range(image_shape[0]):
+            for j in range(image_shape[1]):
+                pass
+        
         
 
 
