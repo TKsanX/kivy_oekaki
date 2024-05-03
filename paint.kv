@@ -1,0 +1,101 @@
+# -*- coding: utf-8 -*-
+<PaintWidget>:
+    orientation: 'horizontal'
+    on_touch_down: root.on_image1_down(args[1])
+    on_touch_move: root.on_image1_move(args[1])
+    on_touch_up: root.on_image1_up(args[1])
+    id: main_canvas
+    cv_color: (1, 1, 1, 1)
+    canvas:
+        Color:
+            rgba: self.cv_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<ButtonWidget>
+    size_hint_x: 0.2
+    cols: 2
+    rows: 10
+    Button:
+        background_color: 0, 0, 0, 1
+        background_normal: ''
+        on_press: root.color_change_black()
+    Button:
+        background_color: 1, 0, 0, 1
+        background_normal: ''
+        on_press: root.color_change_red()
+    Button:
+        background_color: 0, 1, 0, 1
+        background_normal: ''
+        on_press: root.color_change_green()
+    Button:
+        background_color: 0, 0, 1, 1
+        background_normal: ''
+        on_press: root.color_change_blue()
+    Button:
+        text:'5'
+    Button:
+        text:'6'
+    Button:
+        text:'7'
+    Button:
+        text:'8'
+    Button:
+        text:'9'
+    Button:
+        text:'10'
+    Button:
+        text:'11'
+    Button: 
+        text:'12'
+    Button:
+        text:'13'
+    Button:
+        text:'14'
+    Button:
+        text:'15'
+    Button:
+        text:'16'
+    Button:
+        text:'undo'
+        on_release: app.painter.canvas_undo()
+    Button:
+        text:'test'
+        on_press: root.test_code()
+    Button:
+        text:'gallery'
+        on_press: root.page_gallery()
+    Button:
+        text:'save'
+        on_release: app.save_image_canvas()
+
+<Painter>:
+    canvas:
+        Color:
+            rgb: 1, 1, 1
+
+<GalleryApp>
+    orientation: 'vertical'
+    GridLayout:
+        cols: 2
+        rows: 2
+        Button:
+            text: '1'
+        Button:
+            text: '2'
+        Button:
+            text: '3'
+        Button:
+            text: '4'
+
+    BoxLayout:
+        size_hint_y: 0.3 
+        orientation: 'horizontal'
+        Button:
+            text: '<'
+        Button:
+            text: 'Back'
+        Button:
+            text: '>'
+        
