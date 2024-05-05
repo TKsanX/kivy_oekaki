@@ -2,5 +2,5 @@
 
 kivy1.pyがメインファイル  
 kivy2.pyが画像のメタデータ確認用  
-kivy3.pyが領域探索アルゴリズムのテスト(だったはず)  
+kivy3.pyがなんかいろいろするとこ
 paint.kvがレイアウト用のKv language
