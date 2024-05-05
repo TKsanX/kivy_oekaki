@@ -4,10 +4,16 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.pagelayout import PageLayout
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
-from kivy.graphics import Color, Ellipse, Line
+from kivy.graphics import Color, Ellipse, Line, Rectangle
+from kivy.graphics.texture import Texture
+from kivy.core.image import Image as CoreImage
+import gc
 import cv2
 import numpy as np
 
+import os
+
+import threading as th
 from kivy.core.window import Window
 
 from PIL import Image
@@ -58,11 +64,17 @@ undo処理時に色が適応されない
     同じ絵を描き続ける場合は画面サイズを変更しないようにしてもらう
 #!  一度保存したデータを読み込む際も同様、読み込み時にサイズが違う場合は警告通知を流すように対応する(未実装)
 
+一回塗りつぶしを実行すると2回目以降texture変数を初期化しても一回目と同じところしか塗れない
+    →opengl内部でtextureがキャッシュされてしまうのが原因。
+    ファイル名がキャッシュのキーになっているためクリックごとに増加するカウント変数を用意しファイル名に付与することで解決
+    textureをリロードする関数はあるそうだが使い方を知らないためpass
+    だいぶというかかなり無理やりなためこれでいいのかは知らん
 
 '''
 
 
 color_picker = (0, 0, 0, 1)
+gl_save_count = 0
 
 class PaintWidget(BoxLayout):
     def __init__(self, **kwargs):
@@ -71,6 +83,9 @@ class PaintWidget(BoxLayout):
         self.stroke = []
         self.undo_strokes = []
         self.color_history = []
+        self.save_count = 0
+        
+        self.image_history = [] 
 
     '''
     #* タッチイベント
@@ -83,9 +98,8 @@ class PaintWidget(BoxLayout):
     '''
     
     def on_image1_down(self, touch):
-        
-        
-        self.fill(touch.x, touch.y)
+        self.fill(touch)
+
 
         '''
         global color_picker
@@ -98,15 +112,78 @@ class PaintWidget(BoxLayout):
         '''
     
     
-    def fill(self, x, y):
+    def fill(self, touch):
+        global color_picker
+        global gl_save_count
+        x = touch.x
+        y = touch.y
+
         
         self.export_to_png('temp.png')
         bgr_array = cv2.imread('temp.png')
         image_shape = bgr_array.shape
-        
-        
-        print("縦:" + str(image_shape[0]))
         fix_y = abs(int(y) - image_shape[0])
+        
+        temp1 = cv2.imread('temp.png')
+        
+        if color_picker == (0, 0, 0, 1):
+            fill_mode = 1
+        else:
+            fill_mode = 0
+        
+        color_picker_255 = tuple(component * 255 for component in color_picker[:3])
+        color_picker_255 = color_picker_255[::-1]
+
+        cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), (255,0,0))
+        cv2.imwrite('temp2.png', bgr_array)
+        
+        #差分を取得する
+        diff = cv2.absdiff(temp1, bgr_array, 0)
+        diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+        ret, diff = cv2.threshold(diff, 1, 255, cv2.THRESH_BINARY)
+        diff = cv2.bitwise_not(diff)
+        diff = cv2.cvtColor(diff, cv2.COLOR_GRAY2BGR)
+
+        img = np.where(diff == (0, 0, 0), color_picker_255, (255, 255, 255))
+        
+        mask = np.all(img[:,:,:] == [255, 255, 255], axis=-1)
+        
+        #cv2.imwrite('mask.png', mask)
+        
+        img_rgba = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2BGRA)
+        img_rgba[mask,3] = 0
+        
+        save_img_name = str(self.save_count) + "imga.png"
+        
+        cv2.imwrite(save_img_name, img_rgba)
+        
+        cv_image = CoreImage.load(save_img_name)
+        cv_image = cv_image.texture
+        self.save_count += 1
+        gl_save_count = self.save_count
+        print(self.save_count)
+        
+        with self.canvas:
+            self.color_history.append(color_picker)
+
+            Color(rgba=color_picker)
+            touch.ud['image'] = Rectangle(texture=cv_image, pos=(0, 0), size=(image_shape[1], image_shape[0]))
+        self.image_history.append(img_rgba)
+        self.drawing = True
+        
+        del bgr_array
+        del temp1
+        del diff
+        del img
+        del mask
+        del img_rgba
+        del cv_image
+        gc.collect()
+        
+        
+        #cv2.imwrite('img.png', img)
+        """
+        print("縦:" + str(image_shape[0]))
         print("横:" + str(image_shape[1]))
         
         print(int(fix_y))
@@ -114,35 +191,31 @@ class PaintWidget(BoxLayout):
         print(bgr_array[int(fix_y), int(x), :])
         
         print(int(x),int(fix_y))
-        
+        """
         """
         fix_y が縦軸
         x が横軸
         """
-        gbr_temp_list = []
-        for i in range(image_shape[0]):
-            for j in range(image_shape[1]):
-                pass
-        
-        
-
-
-
     
     def on_image1_move(self, touch):
-        if self.drawing:
-            touch.ud["line"].points += [touch.x, touch.y]
+        pass
+#        if self.drawing:
+#            touch.ud["line"].points += [touch.x, touch.y]
     
     def on_image1_up(self, touch):
         if self.drawing:
             self.drawing = False
-            self.stroke.append(touch.ud['line'])
+            self.stroke.append(touch.ud['image'])
+        print(self.image_history)
+
+        
     #* 一つ戻す処理
     def canvas_undo(self):
         if self.stroke:
             stroke = self.stroke.pop()
             self.undo_strokes.append(stroke)
             self.canvas.remove(stroke)
+
     '''
     #! 仮実装 
     #! 簡易セーブ機能
@@ -230,6 +303,14 @@ class PaintApp(App):
         
         
         return parent
+    def on_stop(self):
+        global gl_save_count
+        print(gl_save_count)
+        for i in range(gl_save_count):
+            os.remove(str(i) + "imga.png")
+        os.remove('temp.png')
+        os.remove('temp2.png')
+        
     
     '''
     #! 保存処理

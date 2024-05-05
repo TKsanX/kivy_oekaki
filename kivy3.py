@@ -1,19 +1,35 @@
 from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.graphics import Color, Ellipse
-from collections import deque
+from kivy.uix.floatlayout import FloatLayout
+from kivy.graphics import Color, Rectangle
 
-def fill_region(image, seed_point, fill_color):
-    q = [seed_point]  # 探索待ちキュー
-    region = []       # 塗りつぶし領域の座標リスト
-    while q:
-        x, y = q.pop(0)  # キューから座標を取り出す
-        if image[y][x] != fill_color:  # その座標の色が塗りつぶし色と異なれば
-            region.append((x, y))      # 領域リストに追加し
-            image[y][x] = fill_color   # その座標を塗りつぶし色に変える
-            # その座標の上下左右の未探索座標をキューに追加
-            for dx, dy in (0, 1), (0, -1), (1, 0), (-1, 0):
-                x2, y2 = x + dx, y + dy
-                if (0 <= x2 < width) and (0 <= y2 < height):
-                    q.append((x2, y2))
-    return region
+class TriangleDrawer(FloatLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bind(on_touch_down=self.on_touch)
+
+    def on_touch(self, instance, touch):
+        if touch.is_double_tap:
+            return
+        
+        # クリック位置を取得
+        touch_x, touch_y = touch.pos
+        
+        # 三角形の頂点を計算
+        size = 50  # 三角形のサイズ
+        p1 = (touch_x, touch_y)
+        p2 = (touch_x + size, touch_y)
+        p3 = (touch_x + size/2, touch_y + size * 0.866)
+        
+        with self.canvas:
+            # 三角形を描画
+            Color(1, 0, 0)  # 赤色
+            Rectangle(pos=p1, size=(1, 1))  # 頂点1
+            Rectangle(pos=p2, size=(1, 1))  # 頂点2
+            Rectangle(pos=p3, size=(1, 1))  # 頂点3
+
+class TriangleApp(App):
+    def build(self):
+        return TriangleDrawer()
+
+if __name__ == '__main__':
+    TriangleApp().run()
