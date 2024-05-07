@@ -1,9 +1,11 @@
 #  データサイエンスプロジェクトⅲ,ⅳの制作物
 
-kivy1.pyがメインファイル  
+main.pyがkivymdで作り直した新メインファイル
+main.kvが新レイアウト用のKv language
+kivy1.pyが旧メインファイル  
 kivy2.pyが画像のメタデータ確認用  
 kivy3.pyがなんかいろいろするとこ
-paint.kvがレイアウト用のKv language
+paint.kvが旧レイアウト用のKv language
 
 ### todo
 
