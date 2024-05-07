@@ -1,35 +1,49 @@
 from kivy.app import App
-from kivy.uix.floatlayout import FloatLayout
-from kivy.graphics import Color, Rectangle
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
 
-class TriangleDrawer(FloatLayout):
+class MainScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.bind(on_touch_down=self.on_touch)
+        
+        # メインScreenManagerの画面遷移ボタン
+        main_btn1 = Button(text='Go to Main Screen 2', on_press=lambda x: self.manager.current='main2')
+        main_btn2 = Button(text='Go to Sub Screen Manager', on_press=lambda x: self.manager.current='main2')
+        
+        layout = BoxLayout(orientation='vertical')
+        layout.add_widget(main_btn1)
+        layout.add_widget(main_btn2)
+        
+        # サブScreenManagerを作成してメインScreenに追加
+        sub_screen_manager = ScreenManager()
+        sub_screen1 = Screen(name='sub1')
+        sub_screen2 = Screen(name='sub2')
+        sub_screen_manager.add_widget(sub_screen1)
+        sub_screen_manager.add_widget(sub_screen2)
+        
+        layout.add_widget(sub_screen_manager)
+        
+        self.add_widget(layout)
 
-    def on_touch(self, instance, touch):
-        if touch.is_double_tap:
-            return
-        
-        # クリック位置を取得
-        touch_x, touch_y = touch.pos
-        
-        # 三角形の頂点を計算
-        size = 50  # 三角形のサイズ
-        p1 = (touch_x, touch_y)
-        p2 = (touch_x + size, touch_y)
-        p3 = (touch_x + size/2, touch_y + size * 0.866)
-        
-        with self.canvas:
-            # 三角形を描画
-            Color(1, 0, 0)  # 赤色
-            Rectangle(pos=p1, size=(1, 1))  # 頂点1
-            Rectangle(pos=p2, size=(1, 1))  # 頂点2
-            Rectangle(pos=p3, size=(1, 1))  # 頂点3
+class MainScreen2(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        btn = Button(text='Go to Main Screen 1', on_press=lambda x: self.manager.current='main1')
+        self.add_widget(btn)
 
-class TriangleApp(App):
+class ScreenManagerApp(App):
     def build(self):
-        return TriangleDrawer()
+        # メインScreenManagerを作成
+        root = ScreenManager()
+        
+        # メインScreenManagerにScreenを追加
+        main_screen1 = MainScreen(name='main1')
+        main_screen2 = MainScreen2(name='main2')
+        root.add_widget(main_screen1)
+        root.add_widget(main_screen2)
+        
+        return root
 
 if __name__ == '__main__':
-    TriangleApp().run()
+    ScreenManagerApp().run()

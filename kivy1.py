@@ -5,6 +5,11 @@ from kivy.uix.pagelayout import PageLayout
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Ellipse, Line, Rectangle
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.pagelayout import PageLayout
+from kivy.uix.image import Image as KvImage
+
+
 from kivy.graphics.texture import Texture
 from kivy.core.image import Image as CoreImage
 import gc
@@ -75,6 +80,10 @@ undo処理時に色が適応されない
 
 color_picker = (0, 0, 0, 1)
 gl_save_count = 0
+#! デバッグ用モード切替
+#! 0:塗りつぶしモード
+#! 1:描画モード
+write_mode = 0
 
 class PaintWidget(BoxLayout):
     def __init__(self, **kwargs):
@@ -84,7 +93,6 @@ class PaintWidget(BoxLayout):
         self.undo_strokes = []
         self.color_history = []
         self.save_count = 0
-        
         self.image_history = [] 
 
     '''
@@ -98,18 +106,18 @@ class PaintWidget(BoxLayout):
     '''
     
     def on_image1_down(self, touch):
-        self.fill(touch)
-
-
-        '''
-        global color_picker
-        if self.collide_point(*touch.pos):
-            with self.canvas:
-                Color(rgba=color_picker)
-                self.color_history.append(color_picker)
-                touch.ud['line'] = Line(points=(touch.x, touch.y), width=2, rgba=(0, 0, 0, 0))
-            self.drawing = True
-        '''
+        if write_mode == 0:
+            if self.collide_point(*touch.pos):
+                self.fill(touch)
+        else:
+            global color_picker
+            if self.collide_point(*touch.pos):
+                with self.canvas:
+                    Color(rgba=color_picker)
+                    self.color_history.append(color_picker)
+                    touch.ud['line'] = Line(points=(touch.x, touch.y), width=2, rgba=(0, 0, 0, 0))
+                self.drawing = True
+        
     
     
     def fill(self, touch):
@@ -198,15 +206,22 @@ class PaintWidget(BoxLayout):
         """
     
     def on_image1_move(self, touch):
-        pass
-#        if self.drawing:
-#            touch.ud["line"].points += [touch.x, touch.y]
-    
+        if write_mode == 0:
+            pass
+        else:
+            if self.drawing:
+                touch.ud["line"].points += [touch.x, touch.y]
+
     def on_image1_up(self, touch):
-        if self.drawing:
-            self.drawing = False
-            self.stroke.append(touch.ud['image'])
-        print(self.image_history)
+        if write_mode == 0:
+            if self.drawing:
+                self.drawing = False
+                self.stroke.append(touch.ud['image'])
+            #print(self.image_history)
+        else:
+            if self.drawing:
+                self.drawing = False
+                self.stroke.append(touch.ud['line'])
 
         
     #* 一つ戻す処理
@@ -215,6 +230,7 @@ class PaintWidget(BoxLayout):
             stroke = self.stroke.pop()
             self.undo_strokes.append(stroke)
             self.canvas.remove(stroke)
+            
 
     '''
     #! 仮実装 
@@ -224,15 +240,29 @@ class PaintWidget(BoxLayout):
     #* 色の保存V
     '''
     def save_canvas_data(self):
-        canvas_data = []
-        count = 0
-        for stroke in self.stroke:
-            color = self.color_history[count]
-            count += 1
-            points = [round(p, 2) for p in stroke.points]
-            width = round(stroke.width, 2)
-            canvas_data.append({'points': points, 'width': width, 'color': color})
-        return canvas_data
+        if write_mode == 0:
+            canvas_data = []
+            count = 0
+            for i in self.image_history:
+                color = self.color_history[count]
+                images= self.image_history[count]
+                
+                canvas_data.append({'image': images, 'color': color})
+                count += 1
+
+            print(canvas_data)
+            return canvas_data
+        else:
+            canvas_data = []
+            count = 0
+            for stroke in self.stroke:
+                color = self.color_history[count]
+                count += 1
+                points = [round(p, 2) for p in stroke.points]
+                width = round(stroke.width, 2)
+                canvas_data.append({'points': points, 'width': width, 'color': color})
+            print(canvas_data)
+            return canvas_data
 
     def load_canvas_data(self, canvas_data):
         for stroke in self.stroke:
@@ -277,8 +307,43 @@ class ButtonWidget(GridLayout):
         pass
 
 class galleryApp(BoxLayout):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.img_path = './saves/'
+        self.img_list = [os.path.join(self.img_path, f) for f in os.listdir(self.img_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
+        self.page_count = 1
 
+        # GridLayoutを作成
+        self.page = PageLayout(border=0)
+
+        def next_page(instance):
+            self.page_layout.next_page()
+
+        self.images_per_page = 4
+        # 画像ファイルをGridLayoutに配置
+        self.img_count = len(self.img_list)
+
+        self.img_groups = [self.img_list[i:i+self.images_per_page] for i in range(0, len(self.img_list), self.images_per_page)]
+
+
+        for group in self.img_groups:
+            grid = GridLayout(cols=2, rows=2)
+            for path in group:
+                image = KvImage(source=path)
+                grid.add_widget(image)
+            self.page.add_widget(grid)
+
+        # GridLayoutをルートウィジェットに追加
+        self.add_widget(self.page)
+
+    def n_page(self):
+        if self.page_count != 0 and int(self.page_count) <= int(len(self.img_list)/4):
+            self.page_count += 1
+            self.page.next_page()
+    def p_page(self):
+        self.page_count-= 1
+
+    
 
 
 class PaintApp(App):
@@ -290,6 +355,7 @@ class PaintApp(App):
         
         parent.add_widget(self.painter)
         parent.add_widget(self.buttons)
+        parent.add_widget(self.gallery)
         
         #! 仮セーブボタン
         save_button = Button(text="Save", size_hint=(0.1, 0.1), pos_hint={'x': 0.7, 'y': 0.9})

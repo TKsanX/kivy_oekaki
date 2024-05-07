@@ -1,0 +1,126 @@
+# -*- coding: utf-8 -*-
+
+
+ScreenManager:
+    MenuScreen:
+    PainterScreen:
+
+
+<MenuScreen>:
+    name: "main"
+    md_bg_color: app.theme_cls.surfaceColor
+    MDBoxLayout:
+        MDButton:
+            style: "elevated"
+            pos_hint: {'center_x':0.5,'center_y':0.5}
+            on_release: app.root.current = 'painter'
+            MDButtonText:
+                text: "Go painter"
+        MDButton:
+            style: "elevated"
+            pos_hint: {'center_x':0.5,'center_y':0.5}
+            on_release: app.root.current = 'gallery'
+            MDButtonText:
+                text: "Go gallery"
+
+
+
+
+<PainterScreen>:
+    name: "painter"
+    md_bg_color: app.theme_cls.surfaceColor
+    MDBoxLayout:
+        orientation: 'horizontal'
+        MDBoxLayout:
+            orientation: 'horizontal'
+            on_touch_down: root.on_image1_down(args[1])
+            on_touch_move: root.on_image1_move(args[1])
+            on_touch_up: root.on_image1_up(args[1])
+            id: main_canvas
+            cv_color: (1, 1, 1, 1)
+            canvas:
+                Color:
+                    rgba: self.cv_color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        MDGridLayout:
+            size_hint: 0.2, 1
+            cols: 2
+            rows: 10
+            Button:
+                background_color: 0, 0, 0, 1
+                background_normal: ''
+                on_press: root.color_change_black()
+            Button:
+                background_color: 1, 0, 0, 1
+                background_normal: ''
+                on_press: root.color_change_red()
+            Button:
+                background_color: 0, 1, 0, 1
+                background_normal: ''
+                on_press: root.color_change_green()
+            Button:
+                background_color: 0, 0, 1, 1
+                background_normal: ''
+                on_press: root.color_change_blue()
+            Button:
+                text:'Load'
+                on_release: root.load_canvas()
+            Button:
+                text:'6'
+            Button:
+                text:'7'
+            Button:
+                text:'8'
+            Button:
+                text:'9'
+            Button:
+                text:'10'
+            Button:
+                text:'11'
+            Button: 
+                text:'12'
+            Button:
+                text:'13'
+            Button:
+                text:'14'
+            Button:
+                text:'15'
+            Button:
+                text:'16'
+            Button:
+                text:'undo'
+                on_release: root.canvas_undo()
+            Button:
+                text:'test'
+                on_press: root.test_code()
+            Button:
+                text:'gallery'
+                on_press: app.root.current = 'gallery'
+            Button:
+                text:'save'
+                on_release: root.save_image_canvas()
+
+<GalleryScreen>:
+    name: "gallery"
+    md_bg_color: app.theme_cls.surfaceColor
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        MDBoxLayout:
+            orientation: 'horizontal'
+            id: gallery_page
+        MDBoxLayout:
+            size_hint_y: 0.3 
+
+            orientation: 'horizontal'
+            Button:
+                text: '<'
+                on_release: root.prev_page()
+            Button:
+                text: 'Back'
+                on_release: app.root.current = 'main'
+            Button:
+                text: '>'
+                on_release: root.next_page()

@@ -1,4 +1,26 @@
 # -*- coding: utf-8 -*-
+#: import SlideTransition kivy.uix.screenmanager.SlideTransition
+
+
+<TestWidget>:
+    PainterWidget:
+    ButtonWidget:
+
+
+
+<MainManager>:
+    ids: main_manager
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            text: 'Start'
+            on_press: root.manager.current = 'painter'
+        Button:
+            text: 'Gallery'
+            on_press: root.manager.current = 'gallery'
+
+
+
 <PaintWidget>:
     orientation: 'horizontal'
     on_touch_down: root.on_image1_down(args[1])
@@ -12,6 +34,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
+
 
 <ButtonWidget>
     size_hint_x: 0.2
@@ -75,27 +98,19 @@
         Color:
             rgb: 1, 1, 1
 
-<GalleryApp>
+<GalleryApp>:
     orientation: 'vertical'
-    GridLayout:
-        cols: 2
-        rows: 2
-        Button:
-            text: '1'
-        Button:
-            text: '2'
-        Button:
-            text: '3'
-        Button:
-            text: '4'
+    id: gallery_page
 
     BoxLayout:
         size_hint_y: 0.3 
         orientation: 'horizontal'
         Button:
             text: '<'
+            on_release: root.p_page()
+
         Button:
             text: 'Back'
         Button:
             text: '>'
-        
+            on_release: root.n_page()
