@@ -68,7 +68,8 @@ ScreenManager:
                 text:'Load'
                 on_release: root.load_canvas()
             Button:
-                text:'6'
+                text:'nurie'
+                on_release: root.load_nurie_data()
             Button:
                 text:'7'
             Button:
@@ -117,10 +118,13 @@ ScreenManager:
             orientation: 'horizontal'
             Button:
                 text: '<'
-                on_release: root.prev_page()
+                on_release: root.page_prev()
             Button:
                 text: 'Back'
                 on_release: app.root.current = 'main'
             Button:
                 text: '>'
-                on_release: root.next_page()
+                on_release: root.page_next()
+            Button:
+                text: 'refresh'
+                on_release: root.rebuild_gallery()

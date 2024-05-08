@@ -276,7 +276,7 @@ class PaintWidget(BoxLayout):
                 line = Line(points=stroke_data['points'], width=stroke_data['width'])
                 self.stroke.append(line)
                 self.color_history.append(stroke_data['color'])
-        
+
 
 
 class ButtonWidget(GridLayout):

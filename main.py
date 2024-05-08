@@ -69,9 +69,7 @@ class PainterScreen(MDScreen):
                     self.color_history.append(self.color_picker)
                     touch.ud['line'] = Line(points=(touch.x, touch.y), width=2, rgba=(0, 0, 0, 0))
                 self.drawing = True
-        
-    
-    
+
     def fill(self, touch):
         global gl_save_count
         x = touch.x
@@ -270,8 +268,10 @@ class PainterScreen(MDScreen):
         hight_root = self.height
         self.export_to_png(fl_name)
         raw_image = Image.open(fl_name)
-        cuted_image = raw_image.crop((0, 0, width_canvas, hight_root))
-        cv2.imwrite(fl_name, np.array(cuted_image))
+        cutted_image = raw_image.crop((0, 0, width_canvas, hight_root))
+        color_rb = cv2.cvtColor(np.array(cutted_image).astype(np.uint8), cv2.COLOR_BGR2RGB)
+        
+        cv2.imwrite(fl_name, np.array(color_rb))
         
         tmp_image = Image.open(fl_name)
 
@@ -304,6 +304,24 @@ class PainterScreen(MDScreen):
                 canvas_data.append({'points': points, 'width': width, 'color': color})
             print(canvas_data)
             return canvas_data
+        
+    def load_nurie_data(self):
+        file = cv2.imread('./nurie/1.png', 0)
+    
+        threshold = 200
+    
+        ret, img_thresh = cv2.threshold(file, threshold, 255, cv2.THRESH_BINARY)
+        
+        cv2.imwrite('nurie.png', img_thresh)
+        
+        c_width = self.ids.main_canvas.width
+        c_height = self.height
+        
+        cv_image = CoreImage.load("nurie.png")
+        cv_image = cv_image.texture
+        with self.canvas:
+            Rectangle(texture=cv_image, pos=(0, 0), size=(c_width, c_height))
+
 
 class GalleryScreen(MDScreen):
     def __init__(self, **kwargs):
@@ -322,50 +340,98 @@ class GalleryScreen(MDScreen):
         self.img_groups = [self.img_list[i:i+self.images_per_page] for i in range(0, len(self.img_list), self.images_per_page)]
         print(math.ceil(self.img_count/6))
 
-        self.MDGpage = MDScreen(name='page1')
-        """
-        for group in self.img_groups:
-            grid = MDGridLayout(cols=3, rows=2)
-            for path in group:
-                image = KvImage(source=path)
-                grid.add_widget(image)
-                self.MDGpage.add_widget(grid)
-            self.page_g.add_widget(self.MDGpage)
-            self.page_count += 1
-        """
+        self.MDGpage = []
+        
+        for i in range(math.ceil(self.img_count/6)):
+            self.MDGpage.append(MDScreen(name='page' + str(i+1)))
+        
+        print(self.MDGpage[0])
+        print(self.MDGpage[1])
+        
         self.count_grid = 0
         for i in range(math.ceil(self.img_count/6)):
             gird = MDGridLayout(cols=3, rows=2)
             
-            for i in range(6):
+            for j in range(6):
                 try:
                     gird.add_widget(KvImage(source=self.img_list[self.count_grid]))
                     self.count_grid += 1
                 except:
                     break
-            self.MDGpage.add_widget(gird)
+            print(str(i) + "回目")
+            self.MDGpage[i].add_widget(gird)
+            
 
-
-        self.page_g.add_widget(self.MDGpage)
+        for i in range(math.ceil(self.img_count/6)):
+            self.page_g.add_widget(self.MDGpage[i]) 
         self.gallery_id.add_widget(self.page_g)
+        
+        cur_page = "page" + str(int(self.img_count/6))
+        self.page_g.current = cur_page
+        self.page_count = int(self.img_count/6)
+
     
-    def next_page(self):
-        if self.page_count <= self.img_count/6:
+    def rebuild_gallery(self):
+        
+        
+        self.ids.gallery_page.clear_widgets()
+        
+        self.img_path = './saves/'
+        self.img_list = [os.path.join(self.img_path, f) for f in os.listdir(self.img_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
+        self.page_count = 1
+        self.gallery_id = self.ids.gallery_page
+        # GridLayoutを作成
+        self.page_g = ScreenManager()
+
+
+        self.images_per_page = 6
+        # 画像ファイルをGridLayoutに配置
+        self.img_count = len(self.img_list)
+        self.img_groups = [self.img_list[i:i+self.images_per_page] for i in range(0, len(self.img_list), self.images_per_page)]
+        print(math.ceil(self.img_count/6))
+
+        self.MDGpage = []
+        
+        for i in range(math.ceil(self.img_count/6)):
+            self.MDGpage.append(MDScreen(name='page' + str(i+1)))
+        
+        print(self.MDGpage[0])
+        print(self.MDGpage[1])
+        
+        self.count_grid = 0
+        for i in range(math.ceil(self.img_count/6)):
+            gird = MDGridLayout(cols=3, rows=2)
+            
+            for j in range(6):
+                try:
+                    gird.add_widget(KvImage(source=self.img_list[self.count_grid]))
+                    self.count_grid += 1
+                except:
+                    break
+            self.MDGpage[i].add_widget(gird)
+            
+
+
+        for i in range(math.ceil(self.img_count/6)):
+            self.page_g.add_widget(self.MDGpage[i]) 
+        self.gallery_id.add_widget(self.page_g)
+        
+        cur_page = "page" + str(int(self.img_count/6))
+        self.page_g.current = cur_page
+        self.page_count = int(self.img_count/6)
+    
+    def page_next(self):
+        if self.page_count < self.img_count/6:
             self.page_count += 1
-        print(self.page_count)
-        self.page.current = self.page_count
+            cur_page = "page" + str(self.page_count)
+            self.page_g.current = cur_page
 
 
-    def prev_page(self):
+    def page_prev(self):
         if self.page_count != 1:
             self.page_count -= 1
-        print(self.page_count)
-        self.page.current = self.page_count
-
-
-
-
-
+            cur_page = "page" + str(self.page_count)
+            self.page_g.current = cur_page
 
 class MainApp(MDApp):
     def build(self):
@@ -382,8 +448,6 @@ class MainApp(MDApp):
 
     def set_dynamic_color(self, *args) -> None:
         self.theme_cls.dynamic_color = True
-
-
 
 if __name__ == '__main__':
     MainApp().run()
