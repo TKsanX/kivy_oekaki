@@ -14,7 +14,7 @@ from kivy.graphics import Color, Ellipse, Line, Rectangle
 from kivy.graphics.texture import Texture
 from kivy.core.image import Image as CoreImage
 
-import os
+import os, tkinter, tkinter.filedialog, tkinter.messagebox
 
 import gc
 import cv2
@@ -22,6 +22,7 @@ import numpy as np
 import math
 
 import os
+
 
 
 from PIL import Image
@@ -306,17 +307,23 @@ class PainterScreen(MDScreen):
             return canvas_data
         
     def load_nurie_data(self):
-        file = cv2.imread('./nurie/1.png', 0)
+        iDir = os.path.abspath(os.path.dirname(__file__))
+        raw_img = tkinter.filedialog.askopenfilename(filetypes=[('Image Files', '*.png;*.jpg;*.jpeg')],initialdir=iDir)
+        
+        file = cv2.imread(raw_img, 0)
     
         threshold = 200
+        
+        c_width = int(self.ids.main_canvas.width)
+        c_height = int(self.height)
+        
+        res_img = cv2.resize(file, dsize = (c_width, c_height))
     
-        ret, img_thresh = cv2.threshold(file, threshold, 255, cv2.THRESH_BINARY)
+        ret, img_thresh = cv2.threshold(res_img, threshold, 255, cv2.THRESH_BINARY)
         
         cv2.imwrite('nurie.png', img_thresh)
         
-        c_width = self.ids.main_canvas.width
-        c_height = self.height
-        
+
         cv_image = CoreImage.load("nurie.png")
         cv_image = cv_image.texture
         with self.canvas:
@@ -366,9 +373,18 @@ class GalleryScreen(MDScreen):
             self.page_g.add_widget(self.MDGpage[i]) 
         self.gallery_id.add_widget(self.page_g)
         
-        cur_page = "page" + str(int(self.img_count/6))
-        self.page_g.current = cur_page
-        self.page_count = int(self.img_count/6)
+        
+        if self.img_count % 6 == 0:
+            cur_page = "page" + str(int(self.img_count/6))
+            self.page_g.current = cur_page
+            self.page_count = int(self.img_count/6)
+
+        else:
+            cur_page = "page" + str(int(self.img_count/6)+1)
+            self.page_g.current = cur_page
+            self.page_count = int((self.img_count/6)+1)
+
+
 
     
     def rebuild_gallery(self):
@@ -416,10 +432,17 @@ class GalleryScreen(MDScreen):
             self.page_g.add_widget(self.MDGpage[i]) 
         self.gallery_id.add_widget(self.page_g)
         
-        cur_page = "page" + str(int(self.img_count/6))
-        self.page_g.current = cur_page
-        self.page_count = int(self.img_count/6)
-    
+        if self.img_count % 6 == 0:
+            cur_page = "page" + str(int(self.img_count/6))
+            self.page_g.current = cur_page
+            self.page_count = int(self.img_count/6)
+
+        else:
+            cur_page = "page" + str(int(self.img_count/6)+1)
+            self.page_g.current = cur_page
+            self.page_count = int((self.img_count/6)+1)
+
+
     def page_next(self):
         if self.page_count < self.img_count/6:
             self.page_count += 1
@@ -448,6 +471,29 @@ class MainApp(MDApp):
 
     def set_dynamic_color(self, *args) -> None:
         self.theme_cls.dynamic_color = True
+        
+    def on_stop(self):
+        global gl_save_count
+        print(gl_save_count)
+        for i in range(gl_save_count):
+            os.remove("./tmp/" + str(i) + "imga.png")
+        try:
+            os.remove('temp.png')
+        except:
+            pass
+        
+        try:
+            os.remove('temp2.png')
+        except:
+            pass
+        try:
+            os.remove('temp3.png')
+        except:
+            pass
+        try:
+            os.remove('nurie.png')
+        except:
+            pass
 
 if __name__ == '__main__':
     MainApp().run()
