@@ -1,12 +1,14 @@
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivymd.uix.screenmanager import ScreenManager #, Screen
+from kivy.uix.screenmanager import FadeTransition
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.button import MDButton, MDButtonIcon, MDButtonText
 from kivy.clock import Clock
 from kivymd.uix.navigationrail import MDNavigationRailItem
 from kivy.uix.pagelayout import PageLayout
 from kivymd.uix.gridlayout import MDGridLayout
+from kivymd.uix.floatlayout import MDFloatLayout
 from kivy.uix.image import Image as KvImage
 from kivy.graphics import Color, Ellipse, Line, Rectangle
 from kivy.graphics.texture import Texture
@@ -24,7 +26,7 @@ import os
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
-0
+
 
 color_picker = (0, 0, 0, 1)
 gl_save_count = 0
@@ -299,10 +301,11 @@ class PainterScreen(MDScreen):
         
         c_width = int(self.ids.main_canvas.width)
         c_height = int(self.height)
-        
-        print(str(file.shape[0])) # 縦
-        print(str(file.shape[1])) # 横
-        
+        try:
+            print(str(file.shape[0])) # 縦
+            print(str(file.shape[1])) # 横
+        except:
+            return
         mag_height = c_height / file.shape[0]
         mag_width = c_width / file.shape[1]
         
@@ -316,6 +319,8 @@ class PainterScreen(MDScreen):
         res_img = cv2.resize(file, dsize = (c_width, c_height))
 
         ret, img_thresh = cv2.threshold(res_img, threshold, 255, cv2.THRESH_BINARY)
+        img_thresh = np.where(img_thresh == (0), (40), (255))
+
         
         cv2.imwrite('nurie.png', img_thresh)
         
@@ -337,15 +342,11 @@ class GalleryScreen(MDScreen):
         # 画像ファイルをGridLayoutに配置
         self.img_count = len(self.img_list)
         self.img_groups = [self.img_list[i:i+self.images_per_page] for i in range(0, len(self.img_list), self.images_per_page)]
-        print(math.ceil(self.img_count/6))
 
         self.MDGpage = []
         
         for i in range(math.ceil(self.img_count/6)):
             self.MDGpage.append(MDScreen(name='page' + str(i+1)))
-        
-        print(self.MDGpage[0])
-        print(self.MDGpage[1])
         
         self.count_grid = 0
         for i in range(math.ceil(self.img_count/6)):
@@ -357,7 +358,6 @@ class GalleryScreen(MDScreen):
                     self.count_grid += 1
                 except:
                     break
-            print(str(i) + "回目")
             self.MDGpage[i].add_widget(gird)
             
 
@@ -392,16 +392,12 @@ class GalleryScreen(MDScreen):
         # 画像ファイルをGridLayoutに配置
         self.img_count = len(self.img_list)
         self.img_groups = [self.img_list[i:i+self.images_per_page] for i in range(0, len(self.img_list), self.images_per_page)]
-        print(math.ceil(self.img_count/6))
 
         self.MDGpage = []
         
         for i in range(math.ceil(self.img_count/6)):
             self.MDGpage.append(MDScreen(name='page' + str(i+1)))
-        
-        print(self.MDGpage[0])
-        print(self.MDGpage[1])
-        
+
         self.count_grid = 0
         for i in range(math.ceil(self.img_count/6)):
             gird = MDGridLayout(cols=3, rows=2)
@@ -446,7 +442,7 @@ class MainApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette = "Olive"  # "Purple", "Red"
-        sm = ScreenManager()
+        sm = ScreenManager(transition=FadeTransition())
         sm.add_widget(MenuScreen(name='main'))
         sm.add_widget(PainterScreen(name='painter'))
         sm.add_widget(GalleryScreen(name='gallery'))
