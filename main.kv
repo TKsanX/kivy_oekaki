@@ -124,7 +124,8 @@ ScreenManager:
                 on_release: app.root.current = 'main'
             Button:
                 text: '>'
-                on_release: root.page_next()
+                on_release: 
+                    root.page_next()
             Button:
                 text: 'refresh'
                 on_release: root.rebuild_gallery()

@@ -9,45 +9,37 @@ from kivy.uix.pagelayout import PageLayout
 from kivymd.uix.gridlayout import MDGridLayout
 from kivy.uix.image import Image as KvImage
 from kivy.graphics import Color, Ellipse, Line, Rectangle
-
-
 from kivy.graphics.texture import Texture
 from kivy.core.image import Image as CoreImage
-
 import os, tkinter, tkinter.filedialog, tkinter.messagebox
 
 import gc
 import cv2
 import numpy as np
 import math
-
+import json
+import time
 import os
-
-
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
-
-
-import json
-
-import time
-
+0
 
 color_picker = (0, 0, 0, 1)
 gl_save_count = 0
+
+
 #! デバッグ用モード切替
 #! 0:塗りつぶしモード
 #! 1:描画モード
 write_mode = 0
 
 
+
 # Declare both screens
 class MenuScreen(MDScreen):
     pass
-
-
 class PainterScreen(MDScreen):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
@@ -94,7 +86,6 @@ class PainterScreen(MDScreen):
         
         temp1 = cv2.imread('temp.png')
 
-
         if self.color_picker == (0, 0, 0, 1):
             fill_mode = 1
         else:
@@ -112,8 +103,6 @@ class PainterScreen(MDScreen):
         else:
             cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), (255,0,0))
 
-        
-
         cv2.imwrite('temp2.png', bgr_array)
         
         #差分を取得する
@@ -126,7 +115,6 @@ class PainterScreen(MDScreen):
         img = np.where(diff == (0, 0, 0), color_picker_255, (255, 255, 255))
         
         mask = np.all(img[:,:,:] == [255, 255, 255], axis=-1)
-        
         
         img_rgba = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2BGRA)
         img_rgba[mask,3] = 0
@@ -158,8 +146,6 @@ class PainterScreen(MDScreen):
         del cv_image
         gc.collect()
         
-
-    
     def on_image1_move(self, touch):
         if write_mode == 0:
             pass
@@ -178,15 +164,13 @@ class PainterScreen(MDScreen):
                 self.drawing = False
                 self.stroke.append(touch.ud['line'])
 
-        
     #* 一つ戻す処理
     def canvas_undo(self):
         if self.stroke:
             stroke = self.stroke.pop()
             self.undo_strokes.append(stroke)
             self.canvas.remove(stroke)
-            
-
+    
     def save_canvas_data(self):
         if write_mode == 0:
             canvas_data = []
@@ -224,7 +208,7 @@ class PainterScreen(MDScreen):
                 line = Line(points=stroke_data['points'], width=stroke_data['width'])
                 self.stroke.append(line)
                 self.color_history.append(stroke_data['color'])
-        
+    
     def color_change_black(self):
         self.color_picker = (0, 0, 0, 1)
     def color_change_red(self):
@@ -234,7 +218,6 @@ class PainterScreen(MDScreen):
     def color_change_blue(self):
         self.color_picker = (0, 0, 1, 1)
         
-    
     def test_code(self):
         pass
 
@@ -311,25 +294,35 @@ class PainterScreen(MDScreen):
         raw_img = tkinter.filedialog.askopenfilename(filetypes=[('Image Files', '*.png;*.jpg;*.jpeg')],initialdir=iDir)
         
         file = cv2.imread(raw_img, 0)
-    
+
         threshold = 200
         
         c_width = int(self.ids.main_canvas.width)
         c_height = int(self.height)
         
+        print(str(file.shape[0])) # 縦
+        print(str(file.shape[1])) # 横
+        
+        mag_height = c_height / file.shape[0]
+        mag_width = c_width / file.shape[1]
+        
+        if mag_height < mag_width:
+            mag = mag_height
+        else:
+            mag = mag_width
+        c_width = int(file.shape[1] * mag)
+        c_height = int(file.shape[0] * mag)
+        
         res_img = cv2.resize(file, dsize = (c_width, c_height))
-    
+
         ret, img_thresh = cv2.threshold(res_img, threshold, 255, cv2.THRESH_BINARY)
         
         cv2.imwrite('nurie.png', img_thresh)
         
-
         cv_image = CoreImage.load("nurie.png")
         cv_image = cv_image.texture
         with self.canvas:
             Rectangle(texture=cv_image, pos=(0, 0), size=(c_width, c_height))
-
-
 class GalleryScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -339,7 +332,6 @@ class GalleryScreen(MDScreen):
         self.gallery_id = self.ids.gallery_page
         # GridLayoutを作成
         self.page_g = ScreenManager()
-
 
         self.images_per_page = 6
         # 画像ファイルをGridLayoutに配置
@@ -384,9 +376,6 @@ class GalleryScreen(MDScreen):
             self.page_g.current = cur_page
             self.page_count = int((self.img_count/6)+1)
 
-
-
-    
     def rebuild_gallery(self):
         
         
@@ -398,7 +387,6 @@ class GalleryScreen(MDScreen):
         self.gallery_id = self.ids.gallery_page
         # GridLayoutを作成
         self.page_g = ScreenManager()
-
 
         self.images_per_page = 6
         # 画像ファイルをGridLayoutに配置
@@ -427,7 +415,6 @@ class GalleryScreen(MDScreen):
             self.MDGpage[i].add_widget(gird)
             
 
-
         for i in range(math.ceil(self.img_count/6)):
             self.page_g.add_widget(self.MDGpage[i]) 
         self.gallery_id.add_widget(self.page_g)
@@ -442,20 +429,19 @@ class GalleryScreen(MDScreen):
             self.page_g.current = cur_page
             self.page_count = int((self.img_count/6)+1)
 
-
     def page_next(self):
         if self.page_count < self.img_count/6:
             self.page_count += 1
             cur_page = "page" + str(self.page_count)
+            self.page_g.transition.direction = 'left'
             self.page_g.current = cur_page
-
 
     def page_prev(self):
         if self.page_count != 1:
             self.page_count -= 1
             cur_page = "page" + str(self.page_count)
+            self.page_g.transition.direction = 'right'
             self.page_g.current = cur_page
-
 class MainApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Light"
@@ -481,7 +467,6 @@ class MainApp(MDApp):
             os.remove('temp.png')
         except:
             pass
-        
         try:
             os.remove('temp2.png')
         except:
