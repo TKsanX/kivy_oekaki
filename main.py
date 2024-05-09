@@ -25,11 +25,8 @@ import os
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
-
-
 color_picker = (0, 0, 0, 1)
 gl_save_count = 0
-
 
 #! デバッグ用モード切替
 #! 0:塗りつぶしモード
