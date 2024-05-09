@@ -38,6 +38,7 @@ write_mode = 0
 # Declare both screens
 class MenuScreen(MDScreen):
     pass
+
 class PainterScreen(MDScreen):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
