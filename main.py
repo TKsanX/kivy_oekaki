@@ -8,7 +8,6 @@ from kivy.clock import Clock
 from kivymd.uix.navigationrail import MDNavigationRailItem
 from kivy.uix.pagelayout import PageLayout
 from kivymd.uix.gridlayout import MDGridLayout
-from kivymd.uix.floatlayout import MDFloatLayout
 from kivy.uix.image import Image as KvImage
 from kivy.graphics import Color, Ellipse, Line, Rectangle
 from kivy.graphics.texture import Texture
