@@ -1,5 +1,3 @@
-from kivy_deps import sdl2, glew
-
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivymd.uix.screenmanager import ScreenManager #, Screen
@@ -15,6 +13,8 @@ from kivy.graphics import Color, Ellipse, Line, Rectangle
 from kivy.graphics.texture import Texture
 from kivy.core.image import Image as CoreImage
 import os, tkinter, tkinter.filedialog, tkinter.messagebox
+
+import kivymd.icon_definitions
 
 import gc
 import cv2
