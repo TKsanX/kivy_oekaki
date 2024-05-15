@@ -1,0 +1,11 @@
+/venv
+/venv2
+/tmp
+/__pycache__
+/backup
+/bd
+/build
+/dist
+/main.build
+/main.dist
+/source
