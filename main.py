@@ -1,3 +1,5 @@
+from kivy_deps import sdl2, glew
+
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivymd.uix.screenmanager import ScreenManager #, Screen
