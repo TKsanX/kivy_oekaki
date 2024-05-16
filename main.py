@@ -66,6 +66,8 @@ class PainterScreen(MDScreen):
 
     def fill(self, touch):
         global gl_save_count
+        global countA
+        global cv_image
         x = touch.x
         y = touch.y
 
@@ -79,17 +81,14 @@ class PainterScreen(MDScreen):
         raw_image = Image.open('temp.png')
         cuted_image = raw_image.crop((0, 0, width_canvas, hight_root))
 
-        #cv2.imwrite('temp.png', np.array(cuted_image))
+        cv2.imwrite('temp.png', np.array(cuted_image))
         
-        bgr_array = np.array(cuted_image)   
+        bgr_array = cv2.imread('temp.png')
+        bgr_array = cv2.cvtColor(bgr_array, cv2.COLOR_BGR2RGB)
+        cv2.imwrite('temp3.png', bgr_array)
         image_shape = bgr_array.shape
         fix_y = abs(int(y) - image_shape[0])
         
-
-        if self.color_picker == (0, 0, 0, 1):
-            fill_mode = 1
-        else:
-            fill_mode = 0
         
         color_picker_255 = tuple(component * 255 for component in self.color_picker[:3])
         color_picker_255 = color_picker_255[::-1]
@@ -97,51 +96,21 @@ class PainterScreen(MDScreen):
 
         color_value = bgr_array[int(fix_y), int(x)]
         print(color_value[0])
-        if color_value[0] == 255:
-            cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), (0,0,255))
 
-        else:
-            cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), (255,0,0))
+        cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), color_picker_255)
+        
+        cv2.flip(bgr_array, 0, bgr_array)
+    
+        texture_canvas = Texture.create(size=(image_shape[1], image_shape[0]), colorfmt='bgr')
+        texture_canvas.blit_buffer(bgr_array.tobytes(), colorfmt='bgr')
 
-        
-        #差分を取得する
-        diff = cv2.absdiff(temp1, bgr_array, 0)
-        diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-        ret, diff = cv2.threshold(diff, 1, 255, cv2.THRESH_BINARY)
-        diff = cv2.bitwise_not(diff)
-        diff = cv2.cvtColor(diff, cv2.COLOR_GRAY2BGR)
-        img = np.where(diff == (0, 0, 0), color_picker_255, (255, 255, 255))
-        
-        mask = np.all(img[:,:,:] == [255, 255, 255], axis=-1)
-        
-        img_rgba = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2BGRA)
-        img_rgba[mask,3] = 0
-        
-        save_img_name = "./tmp/" + str(self.save_count) + "imga.png"
-        
-        cv2.imwrite(save_img_name, img_rgba)
-        
-        cv_image = CoreImage.load(save_img_name)
-        cv_image = cv_image.texture
-        self.save_count += 1
-        gl_save_count = self.save_count
-        print(self.save_count)
         
         with self.canvas:
-            self.color_history.append(self.color_picker)
+            touch.ud['image'] = Rectangle(texture=texture_canvas, pos=(0, 0), size=(image_shape[1], image_shape[0]))
 
-            Color(rgba=self.color_picker)
-            touch.ud['image'] = Rectangle(texture=cv_image, pos=(0, 0), size=(image_shape[1], image_shape[0]))
-        self.image_history.append(img_rgba)
         self.drawing = True
         
         del bgr_array
-        del temp1
-        del diff
-        del img
-        del mask
-        del img_rgba
-        del cv_image
         gc.collect()
         
     def on_image1_move(self, touch):
@@ -322,6 +291,7 @@ class PainterScreen(MDScreen):
         
         cv_image = CoreImage.load("nurie.png")
         cv_image = cv_image.texture
+        
         with self.canvas:
             Rectangle(texture=cv_image, pos=(0, 0), size=(c_width, c_height))
 
