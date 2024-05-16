@@ -100,14 +100,16 @@ class PainterScreen(MDScreen):
         cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), color_picker_255)
         
         cv2.flip(bgr_array, 0, bgr_array)
-    
+        
+        self.image_history.append(bgr_array)
+
         texture_canvas = Texture.create(size=(image_shape[1], image_shape[0]), colorfmt='bgr')
         texture_canvas.blit_buffer(bgr_array.tobytes(), colorfmt='bgr')
 
         
         with self.canvas:
             touch.ud['image'] = Rectangle(texture=texture_canvas, pos=(0, 0), size=(image_shape[1], image_shape[0]))
-
+        print(str(self.image_history))
         self.drawing = True
         
         del bgr_array
@@ -135,6 +137,7 @@ class PainterScreen(MDScreen):
     def canvas_undo(self):
         if self.stroke:
             stroke = self.stroke.pop()
+            self.image_history.pop()
             self.undo_strokes.append(stroke)
             self.canvas.remove(stroke)
     
@@ -142,11 +145,8 @@ class PainterScreen(MDScreen):
         if write_mode == 0:
             canvas_data = []
             count = 0
-            for i in self.image_history:
-                color = self.color_history[count]
-                images= self.image_history[count]
-                
-                canvas_data.append({'image': images, 'color': color})
+            for i in self.image_history:                
+                canvas_data.append({'image': self.image_history[count]})
                 count += 1
 
             print(canvas_data)
@@ -236,10 +236,9 @@ class PainterScreen(MDScreen):
             canvas_data = []
             count = 0
             for i in self.image_history:
-                color = self.color_history[count]
                 images= self.image_history[count]
-                
-                canvas_data.append({'image': images, 'color': color})
+
+                canvas_data.append({'image': images})
                 count += 1
 
             print(canvas_data)
