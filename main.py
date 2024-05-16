@@ -79,13 +79,12 @@ class PainterScreen(MDScreen):
         raw_image = Image.open('temp.png')
         cuted_image = raw_image.crop((0, 0, width_canvas, hight_root))
 
-        cv2.imwrite('temp.png', np.array(cuted_image))
+        #cv2.imwrite('temp.png', np.array(cuted_image))
         
-        bgr_array = cv2.imread('temp.png')
+        bgr_array = np.array(cuted_image)   
         image_shape = bgr_array.shape
         fix_y = abs(int(y) - image_shape[0])
         
-        temp1 = cv2.imread('temp.png')
 
         if self.color_picker == (0, 0, 0, 1):
             fill_mode = 1
@@ -104,7 +103,6 @@ class PainterScreen(MDScreen):
         else:
             cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), (255,0,0))
 
-        cv2.imwrite('temp2.png', bgr_array)
         
         #差分を取得する
         diff = cv2.absdiff(temp1, bgr_array, 0)
@@ -112,7 +110,6 @@ class PainterScreen(MDScreen):
         ret, diff = cv2.threshold(diff, 1, 255, cv2.THRESH_BINARY)
         diff = cv2.bitwise_not(diff)
         diff = cv2.cvtColor(diff, cv2.COLOR_GRAY2BGR)
-        cv2.imwrite('temp3.png', diff)
         img = np.where(diff == (0, 0, 0), color_picker_255, (255, 255, 255))
         
         mask = np.all(img[:,:,:] == [255, 255, 255], axis=-1)
@@ -327,6 +324,7 @@ class PainterScreen(MDScreen):
         cv_image = cv_image.texture
         with self.canvas:
             Rectangle(texture=cv_image, pos=(0, 0), size=(c_width, c_height))
+
 class GalleryScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
