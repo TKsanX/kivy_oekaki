@@ -13,6 +13,11 @@ from kivy.graphics import Color, Ellipse, Line, Rectangle
 from kivy.graphics.texture import Texture
 from kivy.core.image import Image as CoreImage
 import os, tkinter, tkinter.filedialog, tkinter.messagebox
+import pickle
+import bz2
+import dill
+
+
 
 import kivymd.icon_definitions
 
@@ -51,6 +56,7 @@ class PainterScreen(MDScreen):
         self.color_history = []
         self.save_count = 0
         self.image_history = [] 
+        self.load_state = False
 
     def on_image1_down(self, touch):
         if write_mode == 0:
@@ -66,6 +72,8 @@ class PainterScreen(MDScreen):
 
     def fill(self, touch):
         global gl_save_count
+        global countA
+        global cv_image
         x = touch.x
         y = touch.y
 
@@ -79,17 +87,14 @@ class PainterScreen(MDScreen):
         raw_image = Image.open('temp.png')
         cuted_image = raw_image.crop((0, 0, width_canvas, hight_root))
 
-        #cv2.imwrite('temp.png', np.array(cuted_image))
+        cv2.imwrite('temp.png', np.array(cuted_image))
         
-        bgr_array = np.array(cuted_image)   
+        bgr_array = cv2.imread('temp.png')
+        bgr_array = cv2.cvtColor(bgr_array, cv2.COLOR_BGR2RGB)
+        cv2.imwrite('temp3.png', bgr_array)
         image_shape = bgr_array.shape
         fix_y = abs(int(y) - image_shape[0])
         
-
-        if self.color_picker == (0, 0, 0, 1):
-            fill_mode = 1
-        else:
-            fill_mode = 0
         
         color_picker_255 = tuple(component * 255 for component in self.color_picker[:3])
         color_picker_255 = color_picker_255[::-1]
@@ -97,51 +102,23 @@ class PainterScreen(MDScreen):
 
         color_value = bgr_array[int(fix_y), int(x)]
         print(color_value[0])
-        if color_value[0] == 255:
-            cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), (0,0,255))
 
-        else:
-            cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), (255,0,0))
+        cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), color_picker_255)
+        
+        cv2.flip(bgr_array, 0, bgr_array)
+        
+        self.image_history.append(bgr_array)
+        print(self.image_history)
 
-        
-        #差分を取得する
-        diff = cv2.absdiff(temp1, bgr_array, 0)
-        diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-        ret, diff = cv2.threshold(diff, 1, 255, cv2.THRESH_BINARY)
-        diff = cv2.bitwise_not(diff)
-        diff = cv2.cvtColor(diff, cv2.COLOR_GRAY2BGR)
-        img = np.where(diff == (0, 0, 0), color_picker_255, (255, 255, 255))
-        
-        mask = np.all(img[:,:,:] == [255, 255, 255], axis=-1)
-        
-        img_rgba = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2BGRA)
-        img_rgba[mask,3] = 0
-        
-        save_img_name = "./tmp/" + str(self.save_count) + "imga.png"
-        
-        cv2.imwrite(save_img_name, img_rgba)
-        
-        cv_image = CoreImage.load(save_img_name)
-        cv_image = cv_image.texture
-        self.save_count += 1
-        gl_save_count = self.save_count
-        print(self.save_count)
+        texture_canvas = Texture.create(size=(image_shape[1], image_shape[0]), colorfmt='bgr')
+        texture_canvas.blit_buffer(bgr_array.tobytes(), colorfmt='bgr')
+
         
         with self.canvas:
-            self.color_history.append(self.color_picker)
-
-            Color(rgba=self.color_picker)
-            touch.ud['image'] = Rectangle(texture=cv_image, pos=(0, 0), size=(image_shape[1], image_shape[0]))
-        self.image_history.append(img_rgba)
+            touch.ud['image'] = Rectangle(texture=texture_canvas, pos=(0, 0), size=(image_shape[1], image_shape[0]))
         self.drawing = True
         
         del bgr_array
-        del temp1
-        del diff
-        del img
-        del mask
-        del img_rgba
-        del cv_image
         gc.collect()
         
     def on_image1_move(self, touch):
@@ -166,6 +143,7 @@ class PainterScreen(MDScreen):
     def canvas_undo(self):
         if self.stroke:
             stroke = self.stroke.pop()
+            self.image_history.pop()
             self.undo_strokes.append(stroke)
             self.canvas.remove(stroke)
     
@@ -173,11 +151,8 @@ class PainterScreen(MDScreen):
         if write_mode == 0:
             canvas_data = []
             count = 0
-            for i in self.image_history:
-                color = self.color_history[count]
-                images= self.image_history[count]
-                
-                canvas_data.append({'image': images, 'color': color})
+            for i in self.image_history:                
+                canvas_data.append(self.image_history[count])
                 count += 1
 
             print(canvas_data)
@@ -198,6 +173,7 @@ class PainterScreen(MDScreen):
         for stroke in self.stroke:
             self.canvas.remove(stroke)
         #キャンバスの色を白にする
+        
         self.color_history = []
         self.stroke = []
         with self.canvas:
@@ -221,9 +197,9 @@ class PainterScreen(MDScreen):
 
     def load_canvas(self):
         try:
-            print('load_canvas')
-            with open('canvas.json', 'r') as f:
-                canvas_data = json.load(f)
+            iDir = os.path.abspath(os.path.dirname(__file__))
+            raw_img = tkinter.filedialog.askopenfilename(filetypes=[('Image Files', '*.png')],initialdir=iDir)
+            raw_pickle = raw_img.replace('.png', '.pickle')
             for stroke in self.stroke:
                 try:
                     self.canvas.remove(stroke)
@@ -232,19 +208,62 @@ class PainterScreen(MDScreen):
                 #キャンバスの色を白にする
                 self.color_history = []
                 self.stroke = []
-            with self.canvas:
-                for stroke_data in canvas_data:
-                    print(stroke_data)
-                    Color(rgba=stroke_data['color'])
-                    line = Line(points=stroke_data['points'], width=stroke_data['width'])
-                    self.stroke.append(line)
-                    self.color_history.append(stroke_data['color'])
+            save_img = Image.open(raw_img)
+            width_canvas = self.ids.main_canvas.width 
+            hight_root = self.height
+            metadata = save_img.info
+            meta = []
+            height = metadata["height"]
+            width = metadata["width"]
+            canvas_count = int(metadata["count"])
+            
+            #! 画像のサイズが異なる場合は読み込まない  
+            if int(float(hight_root)) != int(float(height)) and int(float(width_canvas)) != int(float(width)):
+                return
+            else:
+                pass
+            
+            f = open(raw_pickle, 'rb')
+            canvas_array = pickle.load(f)
+            f.close()
+            
+            canvas_array = pickle.loads(canvas_array)
+            canvas_array[0].shape
+
+            self.stroke = []
+            self.undo_strokes = []
+            self.color_history = []
+            self.save_count = 0
+            self.image_history = [] 
+            
+            tmp_count = 0
+            
+            for i in range(canvas_count):
+                texture_canvas = Texture.create(size=(canvas_array[0].shape[1], canvas_array[0].shape[0]), colorfmt='bgr')
+                texture_canvas.blit_buffer(canvas_array[i].tobytes(), colorfmt='bgr')
+
+                
+                with self.canvas:
+                    tmp_rect =  Rectangle(texture=texture_canvas, pos=(0, 0), size=(canvas_array[0].shape[1], canvas_array[0].shape[0])) 
+                    if tmp_count != 0:
+                        self.stroke.append(tmp_rect)
+                    else:
+                        if self.load_state == True:
+                            self.stroke.append(tmp_rect)
+                if tmp_count != 0:
+                    self.image_history.append(canvas_array[i])
+                else:
+                    if self.load_state == True:
+                        self.image_history.append(canvas_array[i])
+                tmp_count += 1
+
         except FileNotFoundError:
             print('FileNotFoundError')
     
     def save_image_canvas(self):
         now_time = time.strftime('%Y%m%d%H%M%S', time.localtime())
         fl_name = './saves/image_' + now_time + '.png'
+        pi_name = './saves/image_' + now_time + '.pickle'
         
         width_canvas = self.ids.main_canvas.width 
         hight_root = self.height
@@ -259,7 +278,16 @@ class PainterScreen(MDScreen):
 
         metadata = PngInfo()
         metadata.add_text('data', now_time)
-        metadata.add_text('LineJson', str(self.save_canvas_data()))
+        canvas_data , canvas_count = self.save_canvas_data()
+        metadata.add_text('height', str(hight_root))
+        metadata.add_text('width', str(width_canvas))
+        metadata.add_text('count', str(canvas_count))
+        
+        f = open(pi_name, 'wb')
+        pickle.dump(canvas_data, f)
+        f.close()
+
+        
         tmp_image.save(fl_name, pnginfo=metadata)
 
     def save_canvas_data(self):
@@ -267,14 +295,14 @@ class PainterScreen(MDScreen):
             canvas_data = []
             count = 0
             for i in self.image_history:
-                color = self.color_history[count]
                 images= self.image_history[count]
-                
-                canvas_data.append({'image': images, 'color': color})
+                canvas_data.append(images)
                 count += 1
+            print(count)
 
-            print(canvas_data)
-            return canvas_data
+            canvas_data = pickle.dumps(canvas_data)
+            
+            return canvas_data , count
         else:
             canvas_data = []
             count = 0
@@ -320,10 +348,29 @@ class PainterScreen(MDScreen):
         
         cv2.imwrite('nurie.png', img_thresh)
         
+        
+        
         cv_image = CoreImage.load("nurie.png")
         cv_image = cv_image.texture
+        
         with self.canvas:
             Rectangle(texture=cv_image, pos=(0, 0), size=(c_width, c_height))
+        
+        width_canvas = self.ids.main_canvas.width 
+        hight_root = self.height
+
+        print(width_canvas)
+
+        self.export_to_png('temp.png')
+
+        
+        raw_image = Image.open('temp.png')
+        cuted_image = raw_image.crop((0, 0, width_canvas, hight_root))
+        cuted_image = cv2.cvtColor(np.array(cuted_image), cv2.COLOR_BGRA2RGB)
+        cuted_image = cv2.flip(cuted_image, 0, cuted_image)
+        self.image_history.append(np.array(cuted_image))
+        print(np.array(cuted_image))
+        self.load_state = True
 
 class GalleryScreen(MDScreen):
     def __init__(self, **kwargs):
