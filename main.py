@@ -56,6 +56,7 @@ class PainterScreen(MDScreen):
         self.color_history = []
         self.save_count = 0
         self.image_history = [] 
+        self.load_state = False
 
     def on_image1_down(self, touch):
         if write_mode == 0:
@@ -246,8 +247,14 @@ class PainterScreen(MDScreen):
                     tmp_rect =  Rectangle(texture=texture_canvas, pos=(0, 0), size=(canvas_array[0].shape[1], canvas_array[0].shape[0])) 
                     if tmp_count != 0:
                         self.stroke.append(tmp_rect)
+                    else:
+                        if self.load_state == True:
+                            self.stroke.append(tmp_rect)
                 if tmp_count != 0:
                     self.image_history.append(canvas_array[i])
+                else:
+                    if self.load_state == True:
+                        self.image_history.append(canvas_array[i])
                 tmp_count += 1
 
         except FileNotFoundError:
@@ -363,6 +370,7 @@ class PainterScreen(MDScreen):
         cuted_image = cv2.flip(cuted_image, 0, cuted_image)
         self.image_history.append(np.array(cuted_image))
         print(np.array(cuted_image))
+        self.load_state = True
 
 class GalleryScreen(MDScreen):
     def __init__(self, **kwargs):
