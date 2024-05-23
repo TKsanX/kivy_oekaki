@@ -30,9 +30,9 @@ kivy1.pyの内容をkivymdで構築しなおしmain.pyに移す作業が80%完�
 仮実装で塗り絵の元絵読み込み機能実装  
 - [x] - 元絵のアス比を変更しないようリスケールしてから配置する機能を実装する  
 branch optimization-flood-fillの発行  
-塗りつぶしの処理をマスクでパーツごとに行うのではなくcv2のfloodfillで得られた結果を直接canvasに描画する仕組みに変更する
-numpyのarrayを画像に埋め込めなかったので仕方なく画像ファイル名と同じpickleファイルを用意して対応
-optimization-flood-fill上でのundo処理が完成
+塗りつぶしの処理をマスクでパーツごとに行うのではなくcv2のfloodfillで得られた結果を直接canvasに描画する仕組みに変更する  
+numpyのarrayを画像に埋め込めなかったので仕方なく画像ファイル名と同じpickleファイルを用意して対応  
+optimization-flood-fill上でのundo処理が完成  
 
 
 
