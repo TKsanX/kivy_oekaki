@@ -34,6 +34,9 @@ branch optimization-flood-fillの発行
 塗りつぶしの処理をマスクでパーツごとに行うのではなくcv2のfloodfillで得られた結果を直接canvasに描画する仕組みに変更する  
 numpyのarrayを画像に埋め込めなかったので仕方なく画像ファイル名と同じpickleファイルを用意して対応  
 optimization-flood-fill上でのundo処理が完成  
+スクリーンショットを撮影する回数を減らす  
+描画されているcanvasの絵をnumpyのarrayで保持しておき、2回目以降の塗りつぶし時にデータを利用することで描画の高速化に成功  
+self.image_historyが上書きされてしまう問題が発生したが、ただの参照渡しによる上書きだったのでdeepcopy関数で対処した(特定に1時間かかった...)  
 
 
 
