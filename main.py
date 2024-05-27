@@ -15,7 +15,8 @@ from kivy.core.image import Image as CoreImage
 import os, tkinter, tkinter.filedialog, tkinter.messagebox
 import pickle
 import bz2
-import dill
+
+from copy import deepcopy
 
 
 
@@ -57,6 +58,8 @@ class PainterScreen(MDScreen):
         self.save_count = 0
         self.image_history = [] 
         self.load_state = False
+        self.final_shape = []
+        
 
     def on_image1_down(self, touch):
         if write_mode == 0:
@@ -81,17 +84,29 @@ class PainterScreen(MDScreen):
         hight_root = self.height
 
         print(width_canvas)
+        if self.final_shape == [str(width_canvas), str(hight_root)]:
+            
 
-        self.export_to_png('temp.png')
+            bgr_array = deepcopy(self.image_history[-1])
+            
+            print(len(bgr_array))
+            bgr_array = cv2.flip(bgr_array, 0, bgr_array)
+            print("履歴読み込み")
+        else:
+            self.export_to_png('temp.png')
 
-        raw_image = Image.open('temp.png')
-        cuted_image = raw_image.crop((0, 0, width_canvas, hight_root))
+            raw_image = Image.open('temp.png')
+            cuted_image = raw_image.crop((0, 0, width_canvas, hight_root))
 
-        cv2.imwrite('temp.png', np.array(cuted_image))
-        
-        bgr_array = cv2.imread('temp.png')
-        bgr_array = cv2.cvtColor(bgr_array, cv2.COLOR_BGR2RGB)
-        cv2.imwrite('temp3.png', bgr_array)
+            cv2.imwrite('temp.png', np.array(cuted_image))
+
+            bgr_array = cv2.imread('temp.png')
+            bgr_array = cv2.cvtColor(bgr_array, cv2.COLOR_BGR2RGB)
+            print("新規読み込み")
+
+        print(self.final_shape)
+        print([width_canvas, hight_root])
+
         image_shape = bgr_array.shape
         fix_y = abs(int(y) - image_shape[0])
         
@@ -101,26 +116,31 @@ class PainterScreen(MDScreen):
         print(color_picker_255)
 
         color_value = bgr_array[int(fix_y), int(x)]
-        print(color_value[0])
-
-        cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), color_picker_255)
         
+        cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), color_picker_255)
+
         cv2.flip(bgr_array, 0, bgr_array)
         
         self.image_history.append(bgr_array)
-        print(self.image_history)
+        self.final_shape = [str(width_canvas), str(hight_root)]
+
 
         texture_canvas = Texture.create(size=(image_shape[1], image_shape[0]), colorfmt='bgr')
         texture_canvas.blit_buffer(bgr_array.tobytes(), colorfmt='bgr')
+        try:
+            cv2.imwrite('temp5.png', self.image_history[2])
+        except:
+            pass
 
-        
         with self.canvas:
             touch.ud['image'] = Rectangle(texture=texture_canvas, pos=(0, 0), size=(image_shape[1], image_shape[0]))
         self.drawing = True
-        
+        print("img_hist:" + str(len(self.image_history)))
+        bgr_array = None
         del bgr_array
         gc.collect()
-        
+
+
     def on_image1_move(self, touch):
         if write_mode == 0:
             pass
@@ -146,7 +166,9 @@ class PainterScreen(MDScreen):
             self.image_history.pop()
             self.undo_strokes.append(stroke)
             self.canvas.remove(stroke)
-    
+
+
+
     def save_canvas_data(self):
         if write_mode == 0:
             canvas_data = []
@@ -228,13 +250,15 @@ class PainterScreen(MDScreen):
             f.close()
             
             canvas_array = pickle.loads(canvas_array)
-            canvas_array[0].shape
 
             self.stroke = []
             self.undo_strokes = []
             self.color_history = []
             self.save_count = 0
             self.image_history = [] 
+            self.final_shape = [width , height]
+
+            
             
             tmp_count = 0
             
@@ -338,7 +362,7 @@ class PainterScreen(MDScreen):
         else:
             mag = mag_width
         c_width = int(file.shape[1] * mag)
-        c_height = int(file.shape[0] * mag)
+         
         
         res_img = cv2.resize(file, dsize = (c_width, c_height))
 
@@ -369,14 +393,17 @@ class PainterScreen(MDScreen):
         cuted_image = cv2.cvtColor(np.array(cuted_image), cv2.COLOR_BGRA2RGB)
         cuted_image = cv2.flip(cuted_image, 0, cuted_image)
         self.image_history.append(np.array(cuted_image))
-        print(np.array(cuted_image))
         self.load_state = True
 
 class GalleryScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.img_path = './saves/'
-        self.img_list = [os.path.join(self.img_path, f) for f in os.listdir(self.img_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
+        try:
+            self.img_list = [os.path.join(self.img_path, f) for f in os.listdir(self.img_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
+        except:
+            os.mkdir('./saves/')
+            self.img_list = [os.path.join(self.img_path, f) for f in os.listdir(self.img_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
         self.page_count = 1
         self.gallery_id = self.ids.gallery_page
         # GridLayoutを作成
