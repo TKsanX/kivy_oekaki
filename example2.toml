@@ -1,0 +1,19 @@
+[iamge]
+final_update = "2024-05-29"
+tags = [
+    ""
+]
+
+[image.prequa]
+images = [
+    "prequa1",
+    "prequa2",
+    "prequa3",
+]
+
+[image.rider]
+images = [
+    "rider1",
+    "rider2",
+    "rider3",
+]

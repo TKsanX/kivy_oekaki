@@ -18,7 +18,7 @@ import bz2
 
 from copy import deepcopy
 
-
+import toml
 
 import kivymd.icon_definitions
 
@@ -41,7 +41,8 @@ gl_save_count = 0
 #! 1:描画モード
 write_mode = 0
 
-
+def tag_index_find(l, x):
+    return l.index(x) if x in l else -1
 
 # Declare both screens
 class MenuScreen(MDScreen):
@@ -513,8 +514,29 @@ class GalleryScreen(MDScreen):
 class SelectScreen(MDScreen):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        with open("./nurie/config.toml") as f:
+            data = toml.load(f)
+
+        """
+        for tag in data["data"]["tags"]:
+            print(tag)
+            for img in data["image"][tag]["images"]:
+                print(img)
+        """
+
+        self.tag_list = data["data"]["tags"]
+        self.img_list = []
+        for tag in self.tag_list:
+            self.img_list.append(data["image"][tag]["images"])
+        
+        print(self.tag_list)
+        print(self.img_list)
+        print(self.img_list[tag_index_find(self.tag_list, self.tag_list[0])])
+        print(self.img_list[tag_index_find(self.tag_list, self.tag_list[1])])
+
+
     
-    
+
 
 
 class MainApp(MDApp):

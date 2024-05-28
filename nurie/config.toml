@@ -1,0 +1,22 @@
+
+[data]
+final_update = "2024-05-29"
+tags = [
+    "wonderfulprecure",
+    "kamenridergeats",
+]
+
+[image.wonderfulprecure]
+images = [
+    "komuyuki",
+    "wonder1",
+
+]
+
+[image.kamenridergeats]
+images = [
+    "chibigeats1",
+    "chibigeats2",
+
+
+]
