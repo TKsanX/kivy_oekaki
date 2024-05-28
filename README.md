@@ -53,9 +53,9 @@ nurie
   |  
   |-config.toml  
   |-[config.tomlで設定したtagと同じ名前のフォルダ]  
-  |    |-  
-  |    |-preview.jpg  
-  |    |-[config.tomlで設定したimg_tagと同じ名前のpngファイル]  
+  |     |-  
+  |     |-preview.jpg  
+  |     |-[config.tomlで設定したimg_tagと同じ名前のpngファイル]  
   .  
   .  
   .  
