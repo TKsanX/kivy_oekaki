@@ -43,3 +43,20 @@ self.image_historyが上書きされてしまう問題が発生したが、た�
 ### できなかったこと
 
 まだなさげ
+
+
+### 以下仕組みなど-------
+
+### 塗り絵フォルダ内の仕組み
+
+nurie  
+  |  
+  |-config.toml  
+  |-[config.tomlで設定したtagと同じ名前のフォルダ]
+  |    |-
+  |    |-preview.jpg
+  |    |-[config.tomlで設定したimg_tagと同じ名前のpngファイル]
+  .
+  .
+  .
+  

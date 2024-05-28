@@ -13,6 +13,12 @@ ScreenManager:
         MDButton:
             style: "elevated"
             pos_hint: {'center_x':0.5,'center_y':0.5}
+            on_release: app.root.current = 'select'
+            MDButtonText:
+                text: "Go select"
+        MDButton:
+            style: "elevated"
+            pos_hint: {'center_x':0.5,'center_y':0.5}
             on_release: app.root.current = 'painter'
             MDButtonText:
                 text: "Go painter"
@@ -24,6 +30,9 @@ ScreenManager:
                 text: "Go gallery"
 
 
+<SelectScreen>:
+    name: "select"
+    md_bg_color: app.theme_cls.surfaceColor
 
 
 <PainterScreen>:

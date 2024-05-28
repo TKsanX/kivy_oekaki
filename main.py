@@ -509,12 +509,21 @@ class GalleryScreen(MDScreen):
             cur_page = "page" + str(self.page_count)
             self.page_g.transition.direction = 'right'
             self.page_g.current = cur_page
+
+class SelectScreen(MDScreen):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+    
+
+
 class MainApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette = "Olive"  # "Purple", "Red"
         sm = ScreenManager(transition=FadeTransition())
         sm.add_widget(MenuScreen(name='main'))
+        sm.add_widget(SelectScreen(name='select'))
         sm.add_widget(PainterScreen(name='painter'))
         sm.add_widget(GalleryScreen(name='gallery'))
         return sm
