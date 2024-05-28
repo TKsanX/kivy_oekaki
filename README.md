@@ -52,11 +52,10 @@ self.image_historyが上書きされてしまう問題が発生したが、た�
 nurie  
   |  
   |-config.toml  
-  |-[config.tomlで設定したtagと同じ名前のフォルダ]
-  |    |-
-  |    |-preview.jpg
-  |    |-[config.tomlで設定したimg_tagと同じ名前のpngファイル]
-  .
-  .
-  .
-  
+  |-[config.tomlで設定したtagと同じ名前のフォルダ]  
+  |    |-  
+  |    |-preview.jpg  
+  |    |-[config.tomlで設定したimg_tagと同じ名前のpngファイル]  
+  .  
+  .  
+  .  
