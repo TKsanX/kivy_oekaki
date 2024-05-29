@@ -1,30 +1,32 @@
-from diffusers import StableDiffusionPipeline
 import torch
+from diffusers import StableDiffusionPipeline
+from diffusers import LCMScheduler
 
-# パイプラインの準備
-pipe = StableDiffusionPipeline.from_single_file(
-    "ProjectTurn8-Stella-pruned.safetensors",
+# Load the model
+pipeline = StableDiffusionPipeline.from_pretrained(
+    "SG161222/Realistic_Vision_V2.0",
     torch_dtype=torch.float16,
-)
+    )
+pipeline = pipeline.to("cuda")
 
-# EasyNegativeV2の準備
-pipe.load_textual_inversion("embed/negative",weight_name="EasyNegativeV2.safetensors",token="EasyNegative")
+pipeline.load_lora_weights(".", weight_name="lora.safetensors")
 
-# NSFWの無効化
-pipe.safety_checker = lambda images, **kwargs: (images, [False] * len(images))
+def generate(prompt, negative_prompt=None, lora_params=None):
+    pipeline.scheduler = LCMScheduler.from_config(pipeline.scheduler.config)
+    image = pipeline(
+        prompt,
+        negative_prompt=negative_prompt,
+        lora_params=lora_params,
+        guidance_scale=1,
+        num_inference_steps=4,
+        num_images_per_prompt=1,
+        height=256,
+        width=256,
+    ).images[0]
+    return image
 
-prompt = "cute cat ear maid"
-negative_prompt = "EasyNegativeV2, bad face"
 
-# 画像生成の実行
-image = pipe(
-    prompt,
-    width  = 256, height = 256,
-    negative_prompt=negative_prompt,
-    num_inference_steps = 10,
-    
-).images[0]  
-
-# 画像の保存と表示
-image.save("output.png")
+prompt = "8k, high quality, real photo, yellow taxi, full body"
+ng_prompt = "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry"
+image = generate(prompt, ng_prompt)
 image

@@ -1,3 +1,6 @@
+from kivymd.uix.card import MDCard
+from kivymd.uix.label import MDLabel
+from kivymd.uix.relativelayout import MDRelativeLayout
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivymd.uix.screenmanager import ScreenManager #, Screen
@@ -529,13 +532,33 @@ class SelectScreen(MDScreen):
         for tag in self.tag_list:
             self.img_list.append(data["image"][tag]["images"])
         
-        print(self.tag_list)
-        print(self.img_list)
-        print(self.img_list[tag_index_find(self.tag_list, self.tag_list[0])])
-        print(self.img_list[tag_index_find(self.tag_list, self.tag_list[1])])
 
 
-    
+
+        self.select_id = self.ids.select_page
+        
+        for i in range(len(self.tag_list)):
+            print(self.tag_list[i])
+            grid = MDGridLayout(cols=3, rows=2)
+            for f in range(len(self.img_list[i])):
+                self.select_id.add_widget(
+                    MDCard(
+                        MDRelativeLayout(
+                            MDLabel(
+                                text = self.tag_list[i] + "\n" + self.img_list[i][f],
+                                adaptive_size=True,
+                                color = "grey",
+                            ),
+                        
+                        ),
+                        style="elevated",
+                        padding="4dp",
+                        size_hint=(None, None),
+                        size = ("240dp","100dp"),
+                        ripple_behavior=True,
+                    )
+                )
+
 
 
 
