@@ -37,8 +37,12 @@ ScreenManager:
         cols: 3
         rows: 5
         id: select_page
-    
-
+    MDBoxLayout:
+        orientation: 'horizontal'
+        Button:
+            text: 'back'
+            on_press: app.root.current = 'main'
+            size_hint: 0.1, 0.1
 
 
 <PainterScreen>:

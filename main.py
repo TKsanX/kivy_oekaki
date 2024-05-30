@@ -1,3 +1,4 @@
+from kivymd.uix.filemanager.filemanager import FitImage
 from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 from kivymd.uix.relativelayout import MDRelativeLayout
@@ -131,10 +132,7 @@ class PainterScreen(MDScreen):
 
         texture_canvas = Texture.create(size=(image_shape[1], image_shape[0]), colorfmt='bgr')
         texture_canvas.blit_buffer(bgr_array.tobytes(), colorfmt='bgr')
-        try:
-            cv2.imwrite('temp5.png', self.image_history[2])
-        except:
-            pass
+
 
         with self.canvas:
             touch.ud['image'] = Rectangle(texture=texture_canvas, pos=(0, 0), size=(image_shape[1], image_shape[0]))
@@ -532,7 +530,8 @@ class SelectScreen(MDScreen):
         for tag in self.tag_list:
             self.img_list.append(data["image"][tag]["images"])
         
-
+        self.link = []
+        self.link_counter = 0
 
 
         self.select_id = self.ids.select_page
@@ -541,9 +540,16 @@ class SelectScreen(MDScreen):
             print(self.tag_list[i])
             grid = MDGridLayout(cols=3, rows=2)
             for f in range(len(self.img_list[i])):
+
                 self.select_id.add_widget(
                     MDCard(
                         MDRelativeLayout(
+                            FitImage(
+                                source = "./nurie/" + self.tag_list[i] + "/preview.jpg",
+                                pos_hint = {"top": 1},
+                                radius = "12dp", 
+
+                            ),
                             MDLabel(
                                 text = self.tag_list[i] + "\n" + self.img_list[i][f],
                                 adaptive_size=True,
@@ -551,16 +557,20 @@ class SelectScreen(MDScreen):
                             ),
                         
                         ),
+                        id = "./nurie/" + self.tag_list[i] + "/" + self.img_list[i][f] + ".png",
                         style="elevated",
                         padding="4dp",
                         size_hint=(None, None),
-                        size = ("240dp","100dp"),
+                        size = ("240dp","240dp"),
                         ripple_behavior=True,
+                        on_press=lambda x: self.move_painter_screen()
+                        
                     )
                 )
+                self.link_counter += 1
 
-
-
+    def move_painter_screen(self,instance):
+        print(instance.id)
 
 class MainApp(MDApp):
     def build(self):
