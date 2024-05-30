@@ -19,6 +19,8 @@ from kivy.core.image import Image as CoreImage
 import os, tkinter, tkinter.filedialog, tkinter.messagebox
 import pickle
 import bz2
+from kivy.core.window import Window
+
 
 from copy import deepcopy
 
@@ -341,16 +343,22 @@ class PainterScreen(MDScreen):
             print(canvas_data)
             return canvas_data
         
-    def load_nurie_data(self):
-        iDir = os.path.abspath(os.path.dirname(__file__))
-        raw_img = tkinter.filedialog.askopenfilename(filetypes=[('Image Files', '*.png;*.jpg;*.jpeg')],initialdir=iDir)
+    def load_nurie_data(self,id):
+        print(id)
+        
+        raw_img = "nurie/" + id
+        print(raw_img)
         
         file = cv2.imread(raw_img, 0)
+        cv2.imwrite('tempp.png', file)
 
         threshold = 200
         
         c_width = int(self.ids.main_canvas.width)
         c_height = int(self.height)
+        
+        print("debug" + str(c_width))
+        print(c_height)
         try:
             print(str(file.shape[0])) # 縦
             print(str(file.shape[1])) # 横
@@ -515,6 +523,10 @@ class GalleryScreen(MDScreen):
 class SelectScreen(MDScreen):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+
+        self.paint_instance = PainterScreen() 
+        
         with open("./nurie/config.toml") as f:
             data = toml.load(f)
 
@@ -563,14 +575,15 @@ class SelectScreen(MDScreen):
                         size_hint=(None, None),
                         size = ("240dp","240dp"),
                         ripple_behavior=True,
-                        on_press=lambda x: self.move_painter_screen()
-                        
+                        on_press=lambda x, id=self.tag_list[i] + "/" + self.img_list[i][f] + ".png": self.move_painter_screen(id),                        
                     )
                 )
                 self.link_counter += 1
 
-    def move_painter_screen(self,instance):
-        print(instance.id)
+    def move_painter_screen(self,id):
+        print(id)
+        self.manager.current = "painter"
+        self.paint_instance.load_nurie_data(id)
 
 class MainApp(MDApp):
     def build(self):
