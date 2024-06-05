@@ -398,7 +398,7 @@ class PainterScreen(MDScreen):
 
         self.export_to_png('temp.png')
 
-        
+        print("debug2")
         raw_image = Image.open('temp.png')
         cuted_image = raw_image.crop((0, 0, width_canvas, hight_root))
         cuted_image = cv2.cvtColor(np.array(cuted_image), cv2.COLOR_BGRA2RGB)
