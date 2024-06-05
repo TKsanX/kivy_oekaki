@@ -343,7 +343,7 @@ class PainterScreen(MDScreen):
             print(canvas_data)
             return canvas_data
         
-    def load_nurie_data(self,id):
+    def load_nurie_data(self1,self,id):
         print(id)
         
         raw_img = "nurie/" + id
@@ -351,6 +351,7 @@ class PainterScreen(MDScreen):
         
         file = cv2.imread(raw_img, 0)
         cv2.imwrite('tempp.png', file)
+        time.sleep(2)
 
         threshold = 200
         
@@ -393,7 +394,7 @@ class PainterScreen(MDScreen):
         width_canvas = self.ids.main_canvas.width 
         hight_root = self.height
 
-        print(width_canvas)
+        print("debud1" + str(width_canvas))
 
         self.export_to_png('temp.png')
 
@@ -581,9 +582,14 @@ class SelectScreen(MDScreen):
                 self.link_counter += 1
 
     def move_painter_screen(self,id):
-        print(id)
         self.manager.current = "painter"
-        self.paint_instance.load_nurie_data(id)
+        print(id)
+        
+        instance_paint = PainterScreen()
+
+        time.sleep(2)
+        instance_paint.load_nurie_data(instance_paint,id)
+        
 
 class MainApp(MDApp):
     def build(self):
