@@ -47,7 +47,7 @@ from PIL.PngImagePlugin import PngInfo
 
 from kivy.uix.button import Button
 
-
+COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
 
 color_picker = (0, 0, 0, 1)
 gl_save_count = 0
@@ -60,7 +60,12 @@ write_mode = 0
 def tag_index_find(l, x):
     return l.index(x) if x in l else -1
 
-
+def on_color(instance, value):
+    global COLOR_PICKER_GLOBAL
+    value = tuple(component * 255 for component in value[:3])
+    value = value[::-1]
+    COLOR_PICKER_GLOBAL = value
+    
 
 class MyPopup(Popup):
     pass
@@ -233,10 +238,13 @@ class PainterScreen(MDScreen):
         image_shape = bgr_array.shape
         fix_y = abs(int(y) - image_shape[0])
         
-        
+        """
         color_picker_255 = tuple(component * 255 for component in self.color_picker[:3])
         color_picker_255 = color_picker_255[::-1]
         print(color_picker_255)
+        """
+        
+        color_picker_255 = COLOR_PICKER_GLOBAL
 
         color_value = bgr_array[int(fix_y), int(x)]
         
@@ -334,20 +342,26 @@ class PainterScreen(MDScreen):
     def color_change_blue(self):
         self.color_picker = (0, 0, 1, 1)
     
+    def change_color(self):
+        print(self.color_picker)
+    
     def color_picker_open(self):
 
-        color_pop = Popup(title='Color Picker', size_hint=(None, None), size=(600, 600))
+        color_pop = Popup(title='Color Picker', size_hint=(None, None), size=(self.width, self.height))
+        clr_picker= ColorPicker(color=self.color_picker)
         
         color_pop.add_widget(
             MDGridLayout(
-                ColorPicker(color=self.color_picker,id="color_picker_screen"),
-                Button(text='Close', size_hint=(None, None),height=50),
+                clr_picker,
+                Button(text='Close', size_hint=(None, None),height=50,on_release=lambda x: color_pop.dismiss()),
                 cols=1,
                 rows=2,
 
             )
             
         )
+        
+        clr_picker.bind(color=on_color)
         
         color_pop.open()
         
