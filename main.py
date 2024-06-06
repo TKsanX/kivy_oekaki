@@ -65,7 +65,6 @@ def on_color(instance, value):
     value = tuple(component * 255 for component in value[:3])
     value = value[::-1]
     COLOR_PICKER_GLOBAL = value
-    
 
 class MyPopup(Popup):
     pass
@@ -87,6 +86,11 @@ class PainterScreen(MDScreen):
         self.image_history = [] 
         self.load_state = False
         self.final_shape = []
+        self.color_changer_count = 1
+        self.color_changer_count_rv = False
+        self.color_change_number = []
+        self.tmp_count = 0
+
         
         self.float_layout = FloatLayout()
         
@@ -342,31 +346,184 @@ class PainterScreen(MDScreen):
     def color_change_blue(self):
         self.color_picker = (0, 0, 1, 1)
     
+
+    def color_change_1(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[0]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_2(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[1]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_3(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[2]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_4(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[3]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_5(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[4]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_6(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[5]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_7(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[6]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_8(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[7]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_9(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[8]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_10(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[9]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_11(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[10]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_12(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[11]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_13(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[12]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_14(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[13]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_15(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[14]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    def color_change_16(self):
+        global COLOR_PICKER_GLOBAL
+        try:
+            COLOR_PICKER_GLOBAL = self.color_change_number[15]
+        except:
+            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+    
     def change_color(self):
         print(self.color_picker)
     
     def color_picker_open(self):
+        def confirm_color():
+            self.color_picker = COLOR_PICKER_GLOBAL
+            
+            if self.color_changer_count == 1:
+                self.ids.clr_btn1.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 2:
+                self.ids.clr_btn2.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 3:
+                self.ids.clr_btn3.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 4:
+                self.ids.clr_btn4.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 5:
+                self.ids.clr_btn5.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 6:
+                self.ids.clr_btn6.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 7:
+                self.ids.clr_btn7.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 8:
+                self.ids.clr_btn8.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 9:
+                self.ids.clr_btn9.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 10:
+                self.ids.clr_btn10.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 11:
+                self.ids.clr_btn11.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 12:
+                self.ids.clr_btn12.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 13:
+                self.ids.clr_btn13.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 14:
+                self.ids.clr_btn14.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 15:
+                self.ids.clr_btn15.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            elif self.color_changer_count == 16:
+                self.ids.clr_btn16.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
+            
+            if self.color_changer_count_rv == False:
+                self.color_change_number.append(self.color_picker)
+            else:
+                self.color_change_number[self.color_changer_count-1] = self.color_picker
+                print("rv:" + str(self.color_changer_count))
 
-        color_pop = Popup(title='Color Picker', size_hint=(None, None), size=(self.width, self.height))
-        clr_picker= ColorPicker(color=self.color_picker)
+            self.color_pop.dismiss()
+            if self.color_changer_count == 16:
+                self.color_changer_count = 1
+                self.color_changer_count_rv = True
+            else:
+                self.color_changer_count += 1
+            
+
         
-        color_pop.add_widget(
+        
+        if self.tmp_count != 0:
+            picker_color_picker = tuple(component / 255 for component in self.color_picker[:3])
+            picker_color_picker = picker_color_picker + (1,)
+            
+        else:
+            picker_color_picker = self.color_picker
+            self.tmp_count += 1
+            
+        print("debug3:" + str(picker_color_picker))
+        self.color_pop = Popup(title='Color Picker', size_hint=(None, None), size=(self.width, self.height))
+        clr_picker = ColorPicker(color=picker_color_picker)
+        
+        self.color_pop.add_widget(
             MDGridLayout(
                 clr_picker,
-                Button(text='Close', size_hint=(None, None),height=50,on_release=lambda x: color_pop.dismiss()),
+                Button(text='Close', size_hint=(None, None),height=50,on_release=lambda x: confirm_color()),
                 cols=1,
                 rows=2,
-
             )
-            
         )
         
         clr_picker.bind(color=on_color)
         
-        color_pop.open()
-        
-
-
+        self.color_pop.open()
 
     def test_code(self):
         pass
