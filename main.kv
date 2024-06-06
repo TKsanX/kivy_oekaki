@@ -84,8 +84,8 @@ ScreenManager:
                 background_normal: ''
                 on_press: root.color_change_blue()
             Button:
-                text:'Load'
-                on_release: root.load_canvas()
+                text:'color_picker'
+                on_release: root.color_picker_open()
             Button:
                 text:'nurie'
                 on_release: root.load_nurie_data()
@@ -121,6 +121,7 @@ ScreenManager:
             Button:
                 text:'save'
                 on_release: root.save_image_canvas()
+
 
 <GalleryScreen>:
     name: "gallery"

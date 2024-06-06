@@ -1,7 +1,9 @@
+from kivy.uix.actionbar import BoxLayout
 from kivymd.uix.filemanager.filemanager import FitImage
 from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 from kivymd.uix.relativelayout import MDRelativeLayout
+from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivymd.uix.screenmanager import ScreenManager #, Screen
@@ -20,6 +22,10 @@ import os, tkinter, tkinter.filedialog, tkinter.messagebox
 import pickle
 import bz2
 from kivy.core.window import Window
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.colorpicker import ColorPicker
+from kivy.uix.popup import Popup
+
 
 
 from copy import deepcopy
@@ -39,6 +45,10 @@ import os
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
+from kivy.uix.button import Button
+
+
+
 color_picker = (0, 0, 0, 1)
 gl_save_count = 0
 
@@ -49,6 +59,12 @@ write_mode = 0
 
 def tag_index_find(l, x):
     return l.index(x) if x in l else -1
+
+
+
+class MyPopup(Popup):
+    pass
+
 
 # Declare both screens
 class MenuScreen(MDScreen):
@@ -67,6 +83,106 @@ class PainterScreen(MDScreen):
         self.load_state = False
         self.final_shape = []
         
+        self.float_layout = FloatLayout()
+        
+        with open("./nurie/config.toml") as f:
+            data = toml.load(f)
+
+        """
+        for tag in data["data"]["tags"]:
+            print(tag)
+            for img in data["image"][tag]["images"]:
+                print(img)
+        """
+
+        self.tag_list = data["data"]["tags"]
+        self.img_list = []
+        for tag in self.tag_list:
+            self.img_list.append(data["image"][tag]["images"])
+        
+
+
+        grid = MDGridLayout(cols=4, rows=5)
+
+        for i in range(len(self.tag_list)):
+            print(self.tag_list[i])
+
+            grid.add_widget(
+                MDCard(
+                    MDRelativeLayout(
+                        FitImage(
+                            source = "./nurie/" + self.tag_list[i] + "/preview.jpg",
+                            pos_hint = {"top": 1},
+                            radius = "12dp", 
+
+                        ),
+                        MDLabel(
+                            text = self.tag_list[i],
+                            adaptive_size=True,
+                            color = "grey",
+                        ),
+                    
+                    ),
+                    style="elevated",
+                    padding="4dp",
+                    size_hint=(1, 1),
+                    ripple_behavior=True,
+                    on_press=lambda x, tag=self.tag_list[i], list=self.img_list[i]: self.update_select_screen(tag,list),                        
+                )
+            )
+        
+        
+        
+        
+        self.float_layout.add_widget(grid)
+        self.add_widget(self.float_layout)
+
+        
+        
+        
+    
+    def update_select_screen(self,id,img_list):
+        print(id)
+        print(img_list)
+        
+        self.float_layout.clear_widgets()
+        
+        
+        grid = MDGridLayout(cols=4, rows=5)
+
+        for i in range(len(img_list)):
+            print(img_list[i])
+
+            grid.add_widget(
+                MDCard(
+                    MDRelativeLayout(
+                        FitImage(
+                            source = "./nurie/" + id + "/" + img_list[i] + ".png",
+                            pos_hint = {"top": 1},
+                            radius = "12dp", 
+
+                        ),
+                        MDLabel(
+                            text = img_list[i],
+                            adaptive_size=True,
+                            color = "grey",
+                        ),
+                    
+                    ),
+                    style="elevated",
+                    padding="4dp",
+                    size_hint=(1, 1),
+                    ripple_behavior=True,
+                    on_press=lambda x, id=id + "/" + img_list[i] + ".png": self.load_nurie_data(id),                        
+                )
+            )
+        
+        
+        
+        
+        self.float_layout.add_widget(grid)
+        
+
 
     def on_image1_down(self, touch):
         if write_mode == 0:
@@ -217,7 +333,27 @@ class PainterScreen(MDScreen):
         self.color_picker = (0, 1, 0, 1)
     def color_change_blue(self):
         self.color_picker = (0, 0, 1, 1)
+    
+    def color_picker_open(self):
+
+        color_pop = Popup(title='Color Picker', size_hint=(None, None), size=(600, 600))
         
+        color_pop.add_widget(
+            MDGridLayout(
+                ColorPicker(color=self.color_picker,id="color_picker_screen"),
+                Button(text='Close', size_hint=(None, None),height=50),
+                cols=1,
+                rows=2,
+
+            )
+            
+        )
+        
+        color_pop.open()
+        
+
+
+
     def test_code(self):
         pass
 
@@ -343,23 +479,28 @@ class PainterScreen(MDScreen):
             print(canvas_data)
             return canvas_data
         
-    def load_nurie_data(self1,self,id):
-        print(id)
+    def load_nurie_data(self,id):
+        
+        
+        self.float_layout.clear_widgets()
         
         raw_img = "nurie/" + id
-        print(raw_img)
         
         file = cv2.imread(raw_img, 0)
         cv2.imwrite('tempp.png', file)
-        time.sleep(2)
 
         threshold = 200
         
+        """
+        c_width = int(self.ids.main_canvas.width)
+        c_height = int(self.height)
+        """
         c_width = int(self.ids.main_canvas.width)
         c_height = int(self.height)
         
-        print("debug" + str(c_width))
-        print(c_height)
+        print("c_width:" + str(c_width))
+        print("c_height:" + str(c_height))
+        
         try:
             print(str(file.shape[0])) # 縦
             print(str(file.shape[1])) # 横
@@ -376,6 +517,7 @@ class PainterScreen(MDScreen):
          
         
         res_img = cv2.resize(file, dsize = (c_width, c_height))
+        print("res:" + str(c_height) + " " + str(c_width))
 
         ret, img_thresh = cv2.threshold(res_img, threshold, 255, cv2.THRESH_BINARY)
         img_thresh = np.where(img_thresh == (0), (40), (255))
@@ -385,7 +527,7 @@ class PainterScreen(MDScreen):
         
         
         
-        cv_image = CoreImage.load("nurie.png")
+        cv_image = CoreImage.load("./nurie.png")
         cv_image = cv_image.texture
         
         with self.canvas:
@@ -394,8 +536,10 @@ class PainterScreen(MDScreen):
         width_canvas = self.ids.main_canvas.width 
         hight_root = self.height
 
-        print("debud1" + str(width_canvas))
+        print("debud1:" + str(width_canvas))
 
+        #! ここがエラー
+        
         self.export_to_png('temp.png')
 
         print("debug2")
@@ -405,6 +549,8 @@ class PainterScreen(MDScreen):
         cuted_image = cv2.flip(cuted_image, 0, cuted_image)
         self.image_history.append(np.array(cuted_image))
         self.load_state = True
+        
+        
 
 class GalleryScreen(MDScreen):
     def __init__(self, **kwargs):
