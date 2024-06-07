@@ -64,7 +64,7 @@ ScreenManager:
                     pos: self.pos
                     size: self.size
         MDGridLayout:
-            size_hint: 0.2, 1
+            size_hint: 0.4, 1
             cols: 2
             rows: 10
             Button:
@@ -143,20 +143,28 @@ ScreenManager:
                 id: clr_btn15
                 on_press: root.color_change_15()
             Button:
-                text: 'load'
-                on_release: root.load_canvas()
+                background_color: 0, 0, 0, 1
+                background_normal: ''
+                id: clr_btn16
+                on_press: root.color_change_16()
+            Button:
+                background_color: 0, 0, 0, 1
+                background_normal: ''
+                id: clr_btn17
+                on_press: root.color_change_17()
+            Button:
+                background_color: 0, 0, 0, 1
+                background_normal: ''
+                id: clr_btn18
+                on_press: root.color_change_18()
+            Button:
+                background_color: 0, 0, 0, 1
+                background_normal: ''
+                id: clr_btn19
+                on_press: root.color_change_19()
             Button:
                 text:'undo'
                 on_release: root.canvas_undo()
-            Button:
-                text:'color_picker'
-                on_release: root.color_picker_open()
-            Button:
-                text:'gallery'
-                on_press: app.root.current = 'gallery'
-            Button:
-                text:'save'
-                on_release: root.save_image_canvas()
 
 
 <GalleryScreen>:
