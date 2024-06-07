@@ -256,14 +256,11 @@ class PainterScreen(MDScreen):
         image_shape = bgr_array.shape
         fix_y = abs(int(y) - image_shape[0])
         
-        """
         color_picker_255 = tuple(component * 255 for component in self.color_picker[:3])
         color_picker_255 = color_picker_255[::-1]
         print(color_picker_255)
-        """
         
-        color_picker_255 = COLOR_PICKER_GLOBAL
-
+        
         color_value = bgr_array[int(fix_y), int(x)]
         
         cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), color_picker_255)
@@ -351,112 +348,47 @@ class PainterScreen(MDScreen):
                 self.stroke.append(line)
                 self.color_history.append(stroke_data['color'])
     
-    def color_change_black(self):
-        self.color_picker = (0, 0, 0, 1)
-    def color_change_red(self):
-        self.color_picker = (1, 0, 0, 1)
-    def color_change_green(self):
-        self.color_picker = (0, 1, 0, 1)
-    def color_change_blue(self):
-        self.color_picker = (0, 0, 1, 1)
+
     
 
     def color_change_1(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[0]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (1, 0, 0, 1)
     def color_change_2(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[1]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0, 1, 0, 1)
     def color_change_3(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[2]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0, 0, 1, 1)
     def color_change_4(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[3]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0.51171875, 0.703125, 0.99609375, 1)
     def color_change_5(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[4]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0.99609375, 0.703125, 0.51171875, 1)
     def color_change_6(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[5]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0.99609375, 0.99609375, 0.51171875, 1)
     def color_change_7(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[6]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0.51171875, 0.99609375, 0.51171875, 1)
     def color_change_8(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[7]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0.51171875, 0.99609375, 0.99609375, 1)
     def color_change_9(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[8]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0.51171875, 0.51171875, 0.99609375, 1)
     def color_change_10(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[9]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0.99609375, 0.51171875, 0.99609375, 1)
     def color_change_11(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[10]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (1, 0, 0, 1)
     def color_change_12(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[11]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0, 1, 0, 1)
     def color_change_13(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[12]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0, 0, 1, 1)
     def color_change_14(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[13]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0.51171875, 0.703125, 0.99609375, 1)
     def color_change_15(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[14]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0.99609375, 0.703125, 0.51171875, 1)
     def color_change_16(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[15]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
+        self.color_picker = (0.99609375, 0.99609375, 0.51171875, 1)
+    def color_change_17(self):
+        self.color_picker = (0.51171875, 0.99609375, 0.51171875, 1)
+    def color_change_18(self):
+        self.color_picker = (0.51171875, 0.99609375, 0.99609375, 1)
+    def color_change_19(self):
+        self.color_picker = (0.51171875, 0.51171875, 0.99609375, 1)
     
     def change_color(self):
         print(self.color_picker)
