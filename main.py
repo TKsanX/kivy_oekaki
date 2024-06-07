@@ -26,8 +26,6 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.colorpicker import ColorPicker
 from kivy.uix.popup import Popup
 
-
-
 from copy import deepcopy
 
 import toml
@@ -141,6 +139,22 @@ class PainterScreen(MDScreen):
             )
         
         
+        grid.add_widget(
+            MDCard(
+                
+                MDLabel(
+                    text = "back",
+                    adaptive_size=True,
+                    color = "grey",
+                ),
+                style="elevated",
+                padding="4dp",
+                size_hint=(1, 1),
+                ripple_behavior=True,
+                on_press=lambda x: self.float_layout.clear_widgets(),                        
+            )
+        )
+        
         
         
         self.float_layout.add_widget(grid)
@@ -187,7 +201,7 @@ class PainterScreen(MDScreen):
             )
         
         
-        
+
         
         self.float_layout.add_widget(grid)
         
@@ -491,7 +505,8 @@ class PainterScreen(MDScreen):
                 print("rv:" + str(self.color_changer_count))
 
             self.color_pop.dismiss()
-            if self.color_changer_count == 16:
+            #* ループ位置指定
+            if self.color_changer_count == 15:
                 self.color_changer_count = 1
                 self.color_changer_count_rv = True
             else:
@@ -515,7 +530,7 @@ class PainterScreen(MDScreen):
         self.color_pop.add_widget(
             MDGridLayout(
                 clr_picker,
-                Button(text='Close', size_hint=(None, None),height=50,on_release=lambda x: confirm_color()),
+                Button(text='Close', size_hint=(None, None),height=50, width=400,on_release=lambda x: confirm_color()),
                 cols=1,
                 rows=2,
             )
@@ -709,7 +724,6 @@ class PainterScreen(MDScreen):
 
         print("debud1:" + str(width_canvas))
 
-        #! ここがエラー
         
         self.export_to_png('temp.png')
 

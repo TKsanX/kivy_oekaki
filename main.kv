@@ -143,10 +143,8 @@ ScreenManager:
                 id: clr_btn15
                 on_press: root.color_change_15()
             Button:
-                background_color: 0, 0, 0, 1
-                background_normal: ''
-                id: clr_btn16
-                on_press: root.color_change_16()
+                text: 'load'
+                on_release: root.load_canvas()
             Button:
                 text:'undo'
                 on_release: root.canvas_undo()
