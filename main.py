@@ -859,10 +859,10 @@ class MainApp(MDApp):
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette = "Olive"  # "Purple", "Red"
         sm = ScreenManager(transition=FadeTransition())
-        sm.add_widget(MenuScreen(name='main'))
-        sm.add_widget(SelectScreen(name='select'))
+        #sm.add_widget(MenuScreen(name='main'))
+        #sm.add_widget(SelectScreen(name='select'))
         sm.add_widget(PainterScreen(name='painter'))
-        sm.add_widget(GalleryScreen(name='gallery'))
+        #sm.add_widget(GalleryScreen(name='gallery'))
         return sm
     
     def on_resume(self, *args):
