@@ -32,8 +32,7 @@ file_name = tkinter.filedialog.askopenfilename(filetypes=fTyp, initialdir=iDir)
 for path in glob.glob(file_name):
     if (os.path.basename(path) == 'Thumbs.db'):
         continue
-    img = cv2.imread(path) # 0なしでカラー
-    dst = scale_to_resolation(img, 640 * 480)
+    dst = cv2.imread(path) # 0なしでカラー
     img = cv2.cvtColor(dst.astype(np.uint8), cv2.COLOR_RGBA2RGB)
     cv2.floodFill(img,None, (10,10) ,(255,255,255))
     gray = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_RGB2GRAY)
@@ -50,11 +49,13 @@ for path in glob.glob(file_name):
 	    for x in range(w):
 		    if img_diff_not[y, x] <= 240:
 			    cv2.rectangle(img2,(2*x-r, 2*y-r), (2*x+r, 2*y+r), (0,0,0), -1)
+    
     img2 = cv2.dilate(img2, neiborhood8, iterations=1)
     img3 = cv2.resize(img2, (w, h))
     at = cv2.adaptiveThreshold(img3, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 20)
 
 cv2.imshow('test6',at)
+cv2.imwrite('test6.png', at)
 
 cv2.waitKey()
 cv2.destroyAllWindows()

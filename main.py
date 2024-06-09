@@ -25,8 +25,12 @@ from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.colorpicker import ColorPicker
 from kivy.uix.popup import Popup
+from kivy.core.window import Window
+
 
 from copy import deepcopy
+
+import image_process
 
 import toml
 
@@ -53,7 +57,7 @@ gl_save_count = 0
 #! デバッグ用モード切替
 #! 0:塗りつぶしモード
 #! 1:描画モード
-write_mode = 0
+write_mode = 1
 
 def tag_index_find(l, x):
     return l.index(x) if x in l else -1
@@ -213,87 +217,23 @@ class PainterScreen(MDScreen):
                 self.fill(touch)
         else:
             if self.collide_point(*touch.pos):
-                with self.canvas:
-                    Color(rgba=self.color_picker)
-                    self.color_history.append(self.color_picker)
-                    touch.ud['line'] = Line(points=(touch.x, touch.y), width=2, rgba=(0, 0, 0, 0))
                 self.drawing = True
 
-    def fill(self, touch):
-        global gl_save_count
-        global countA
-        global cv_image
-        x = touch.x
-        y = touch.y
-
-        width_canvas = self.ids.main_canvas.width 
-        hight_root = self.height
-
-        print(width_canvas)
-        if self.final_shape == [str(width_canvas), str(hight_root)]:
-            
-
-            bgr_array = deepcopy(self.image_history[-1])
-            
-            print(len(bgr_array))
-            bgr_array = cv2.flip(bgr_array, 0, bgr_array)
-            print("履歴読み込み")
-        else:
-            self.export_to_png('temp.png')
-
-            raw_image = Image.open('temp.png')
-            cuted_image = raw_image.crop((0, 0, width_canvas, hight_root))
-
-            cv2.imwrite('temp.png', np.array(cuted_image))
-
-            bgr_array = cv2.imread('temp.png')
-            bgr_array = cv2.cvtColor(bgr_array, cv2.COLOR_BGR2RGB)
-            print("新規読み込み")
-
-        print(self.final_shape)
-        print([width_canvas, hight_root])
-
-        image_shape = bgr_array.shape
-        fix_y = abs(int(y) - image_shape[0])
-        
-        """
-        color_picker_255 = tuple(component * 255 for component in self.color_picker[:3])
-        color_picker_255 = color_picker_255[::-1]
-        print(color_picker_255)
-        """
-        
-        color_picker_255 = COLOR_PICKER_GLOBAL
-
-        color_value = bgr_array[int(fix_y), int(x)]
-        
-        cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), color_picker_255)
-
-        cv2.flip(bgr_array, 0, bgr_array)
-        
-        self.image_history.append(bgr_array)
-        self.final_shape = [str(width_canvas), str(hight_root)]
-
-
-        texture_canvas = Texture.create(size=(image_shape[1], image_shape[0]), colorfmt='bgr')
-        texture_canvas.blit_buffer(bgr_array.tobytes(), colorfmt='bgr')
-
-
-        with self.canvas:
-            touch.ud['image'] = Rectangle(texture=texture_canvas, pos=(0, 0), size=(image_shape[1], image_shape[0]))
-        self.drawing = True
-        print("img_hist:" + str(len(self.image_history)))
-        bgr_array = None
-        del bgr_array
-        gc.collect()
-
-
+    
     def on_image1_move(self, touch):
         if write_mode == 0:
             pass
         else:
             if self.drawing:
-                touch.ud["line"].points += [touch.x, touch.y]
-
+                process_texture = image_process.image_process(self.color_img, self.gray_img, touch.pos)
+                self.gray_img = process_texture
+                texture_canvas = Texture.create(size=(process_texture.shape[1], process_texture.shape[0]), colorfmt='bgr')
+                texture_canvas.blit_buffer(process_texture.tobytes(), colorfmt='bgr')
+                self.canvas.clear()
+                with self.canvas:
+                    Rectangle(texture=texture_canvas, pos=(0, 0), size=(process_texture.shape[1], process_texture.shape[0]))
+                
+                
     def on_image1_up(self, touch):
         if write_mode == 0:
             if self.drawing:
@@ -303,7 +243,6 @@ class PainterScreen(MDScreen):
         else:
             if self.drawing:
                 self.drawing = False
-                self.stroke.append(touch.ud['line'])
 
     #* 一つ戻す処理
     def canvas_undo(self):
@@ -351,194 +290,11 @@ class PainterScreen(MDScreen):
                 self.stroke.append(line)
                 self.color_history.append(stroke_data['color'])
     
-    def color_change_black(self):
-        self.color_picker = (0, 0, 0, 1)
-    def color_change_red(self):
-        self.color_picker = (1, 0, 0, 1)
-    def color_change_green(self):
-        self.color_picker = (0, 1, 0, 1)
-    def color_change_blue(self):
-        self.color_picker = (0, 0, 1, 1)
-    
 
-    def color_change_1(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[0]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_2(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[1]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_3(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[2]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_4(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[3]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_5(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[4]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_6(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[5]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_7(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[6]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_8(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[7]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_9(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[8]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_10(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[9]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_11(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[10]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_12(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[11]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_13(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[12]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_14(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[13]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_15(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[14]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
-    def color_change_16(self):
-        global COLOR_PICKER_GLOBAL
-        try:
-            COLOR_PICKER_GLOBAL = self.color_change_number[15]
-        except:
-            COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
     
     def change_color(self):
         print(self.color_picker)
     
-    def color_picker_open(self):
-        def confirm_color():
-            self.color_picker = COLOR_PICKER_GLOBAL
-            
-            if self.color_changer_count == 1:
-                self.ids.clr_btn1.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 2:
-                self.ids.clr_btn2.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 3:
-                self.ids.clr_btn3.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 4:
-                self.ids.clr_btn4.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 5:
-                self.ids.clr_btn5.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 6:
-                self.ids.clr_btn6.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 7:
-                self.ids.clr_btn7.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 8:
-                self.ids.clr_btn8.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 9:
-                self.ids.clr_btn9.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 10:
-                self.ids.clr_btn10.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 11:
-                self.ids.clr_btn11.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 12:
-                self.ids.clr_btn12.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 13:
-                self.ids.clr_btn13.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 14:
-                self.ids.clr_btn14.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 15:
-                self.ids.clr_btn15.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            elif self.color_changer_count == 16:
-                self.ids.clr_btn16.background_color = tuple(component / 255 for component in self.color_picker[:3])[::-1]
-            
-            if self.color_changer_count_rv == False:
-                self.color_change_number.append(self.color_picker)
-            else:
-                self.color_change_number[self.color_changer_count-1] = self.color_picker
-                print("rv:" + str(self.color_changer_count))
-
-            self.color_pop.dismiss()
-            #* ループ位置指定
-            if self.color_changer_count == 15:
-                self.color_changer_count = 1
-                self.color_changer_count_rv = True
-            else:
-                self.color_changer_count += 1
-            
-
-        
-        
-        if self.tmp_count != 0:
-            picker_color_picker = tuple(component / 255 for component in self.color_picker[:3])
-            picker_color_picker = picker_color_picker + (1,)
-            
-        else:
-            picker_color_picker = self.color_picker
-            self.tmp_count += 1
-            
-        print("debug3:" + str(picker_color_picker))
-        self.color_pop = Popup(title='Color Picker', size_hint=(None, None), size=(self.width, self.height))
-        clr_picker = ColorPicker(color=picker_color_picker)
-        
-        self.color_pop.add_widget(
-            MDGridLayout(
-                clr_picker,
-                Button(text='Close', size_hint=(None, None),height=50, width=400,on_release=lambda x: confirm_color()),
-                cols=1,
-                rows=2,
-            )
-        )
-        
-        clr_picker.bind(color=on_color)
-        
-        self.color_pop.open()
 
     def test_code(self):
         pass
@@ -670,9 +426,13 @@ class PainterScreen(MDScreen):
         
         self.float_layout.clear_widgets()
         
-        raw_img = "nurie/" + id
+        self.raw_img = "test6.png"
+        self.bg_img = "sp1.png"
         
-        file = cv2.imread(raw_img, 0)
+        
+        file = cv2.imread(self.raw_img, 0)
+        file2 = cv2.imread(self.bg_img, 1)
+
         cv2.imwrite('tempp.png', file)
 
         threshold = 200
@@ -700,7 +460,7 @@ class PainterScreen(MDScreen):
         else:
             mag = mag_width
         c_width = int(file.shape[1] * mag)
-         
+        
         
         res_img = cv2.resize(file, dsize = (c_width, c_height))
         print("res:" + str(c_height) + " " + str(c_width))
@@ -708,9 +468,17 @@ class PainterScreen(MDScreen):
         ret, img_thresh = cv2.threshold(res_img, threshold, 255, cv2.THRESH_BINARY)
         img_thresh = np.where(img_thresh == (0), (40), (255))
 
+
+        self.gray_img = cv2.imread(self.raw_img, 1)
+        self.color_img = cv2.imread(self.bg_img, 1)
+
+        self.gray_img = cv2.resize(self.gray_img, dsize = (c_width, c_height))
+        self.color_img = cv2.resize(self.color_img, dsize = (c_width, c_height))
+
+        self.gray_img = cv2.flip(self.gray_img, 0)
+        self.color_img = cv2.flip(self.color_img, 0)
         
         cv2.imwrite('nurie.png', img_thresh)
-        
         
         
         cv_image = CoreImage.load("./nurie.png")
@@ -719,20 +487,9 @@ class PainterScreen(MDScreen):
         with self.canvas:
             Rectangle(texture=cv_image, pos=(0, 0), size=(c_width, c_height))
         
-        width_canvas = self.ids.main_canvas.width 
-        hight_root = self.height
-
-        print("debud1:" + str(width_canvas))
-
         
-        self.export_to_png('temp.png')
 
-        print("debug2")
-        raw_image = Image.open('temp.png')
-        cuted_image = raw_image.crop((0, 0, width_canvas, hight_root))
-        cuted_image = cv2.cvtColor(np.array(cuted_image), cv2.COLOR_BGRA2RGB)
-        cuted_image = cv2.flip(cuted_image, 0, cuted_image)
-        self.image_history.append(np.array(cuted_image))
+
         self.load_state = True
         
         
