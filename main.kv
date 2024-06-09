@@ -2,47 +2,11 @@
 
 
 ScreenManager:
-    MenuScreen:
     PainterScreen:
 
 
-<MenuScreen>:
-    name: "main"
-    md_bg_color: app.theme_cls.surfaceColor
-    MDBoxLayout:
-        MDButton:
-            style: "elevated"
-            pos_hint: {'center_x':0.5,'center_y':0.5}
-            on_release: app.root.current = 'select'
-            MDButtonText:
-                text: "Go select"
-        MDButton:
-            style: "elevated"
-            pos_hint: {'center_x':0.5,'center_y':0.5}
-            on_release: app.root.current = 'painter'
-            MDButtonText:
-                text: "Go painter"
-        MDButton:
-            style: "elevated"
-            pos_hint: {'center_x':0.5,'center_y':0.5}
-            on_release: app.root.current = 'gallery'
-            MDButtonText:
-                text: "Go gallery"
 
 
-<SelectScreen>:
-    name: "select"
-    md_bg_color: app.theme_cls.surfaceColor
-    MDGridLayout:
-        cols: 3
-        rows: 5
-        id: select_page
-    MDBoxLayout:
-        orientation: 'horizontal'
-        Button:
-            text: 'back'
-            on_press: app.root.current = 'main'
-            size_hint: 0.1, 0.1
 
 
 <PainterScreen>:
@@ -66,29 +30,3 @@ ScreenManager:
         
 
 
-<GalleryScreen>:
-    name: "gallery"
-    md_bg_color: app.theme_cls.surfaceColor
-
-    MDBoxLayout:
-        orientation: 'vertical'
-        MDBoxLayout:
-            orientation: 'horizontal'
-            id: gallery_page
-        MDBoxLayout:
-            size_hint_y: 0.3 
-
-            orientation: 'horizontal'
-            Button:
-                text: '<'
-                on_release: root.page_prev()
-            Button:
-                text: 'Back'
-                on_release: app.root.current = 'main'
-            Button:
-                text: '>'
-                on_release: 
-                    root.page_next()
-            Button:
-                text: 'refresh'
-                on_release: root.rebuild_gallery()
