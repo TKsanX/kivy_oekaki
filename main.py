@@ -62,19 +62,7 @@ write_mode = 1
 def tag_index_find(l, x):
     return l.index(x) if x in l else -1
 
-def on_color(instance, value):
-    global COLOR_PICKER_GLOBAL
-    value = tuple(component * 255 for component in value[:3])
-    value = value[::-1]
-    COLOR_PICKER_GLOBAL = value
 
-class MyPopup(Popup):
-    pass
-
-
-# Declare both screens
-class MenuScreen(MDScreen):
-    pass
 
 class PainterScreen(MDScreen):
     def __init__(self,**kwargs):
@@ -252,6 +240,7 @@ class PainterScreen(MDScreen):
         else:
             if self.drawing:
                 self.drawing = False
+                del self.cood_hist
 
     #* 一つ戻す処理
     def canvas_undo(self):
@@ -497,195 +486,8 @@ class PainterScreen(MDScreen):
             Rectangle(texture=cv_image, pos=(0, 0), size=(c_width, c_height))
         
         
-
-
         self.load_state = True
         
-        
-
-class GalleryScreen(MDScreen):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.img_path = './saves/'
-        try:
-            self.img_list = [os.path.join(self.img_path, f) for f in os.listdir(self.img_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
-        except:
-            os.mkdir('./saves/')
-            self.img_list = [os.path.join(self.img_path, f) for f in os.listdir(self.img_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
-        self.page_count = 1
-        self.gallery_id = self.ids.gallery_page
-        # GridLayoutを作成
-        self.page_g = ScreenManager()
-
-        self.images_per_page = 6
-        # 画像ファイルをGridLayoutに配置
-        self.img_count = len(self.img_list)
-        self.img_groups = [self.img_list[i:i+self.images_per_page] for i in range(0, len(self.img_list), self.images_per_page)]
-
-        self.MDGpage = []
-        
-        for i in range(math.ceil(self.img_count/6)):
-            self.MDGpage.append(MDScreen(name='page' + str(i+1)))
-        
-        self.count_grid = 0
-        for i in range(math.ceil(self.img_count/6)):
-            gird = MDGridLayout(cols=3, rows=2)
-            
-            for j in range(6):
-                try:
-                    gird.add_widget(KvImage(source=self.img_list[self.count_grid]))
-                    self.count_grid += 1
-                except:
-                    break
-            self.MDGpage[i].add_widget(gird)
-            
-
-        for i in range(math.ceil(self.img_count/6)):
-            self.page_g.add_widget(self.MDGpage[i]) 
-        self.gallery_id.add_widget(self.page_g)
-        
-        
-        if self.img_count % 6 == 0:
-            cur_page = "page" + str(int(self.img_count/6))
-            self.page_g.current = cur_page
-            self.page_count = int(self.img_count/6)
-
-        else:
-            cur_page = "page" + str(int(self.img_count/6)+1)
-            self.page_g.current = cur_page
-            self.page_count = int((self.img_count/6)+1)
-
-    def rebuild_gallery(self):
-        
-        
-        self.ids.gallery_page.clear_widgets()
-        
-        self.img_path = './saves/'
-        self.img_list = [os.path.join(self.img_path, f) for f in os.listdir(self.img_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
-        self.page_count = 1
-        self.gallery_id = self.ids.gallery_page
-        # GridLayoutを作成
-        self.page_g = ScreenManager()
-
-        self.images_per_page = 6
-        # 画像ファイルをGridLayoutに配置
-        self.img_count = len(self.img_list)
-        self.img_groups = [self.img_list[i:i+self.images_per_page] for i in range(0, len(self.img_list), self.images_per_page)]
-
-        self.MDGpage = []
-        
-        for i in range(math.ceil(self.img_count/6)):
-            self.MDGpage.append(MDScreen(name='page' + str(i+1)))
-
-        self.count_grid = 0
-        for i in range(math.ceil(self.img_count/6)):
-            gird = MDGridLayout(cols=3, rows=2)
-            
-            for j in range(6):
-                try:
-                    gird.add_widget(KvImage(source=self.img_list[self.count_grid]))
-                    self.count_grid += 1
-                except:
-                    break
-            self.MDGpage[i].add_widget(gird)
-            
-
-        for i in range(math.ceil(self.img_count/6)):
-            self.page_g.add_widget(self.MDGpage[i]) 
-        self.gallery_id.add_widget(self.page_g)
-        
-        if self.img_count % 6 == 0:
-            cur_page = "page" + str(int(self.img_count/6))
-            self.page_g.current = cur_page
-            self.page_count = int(self.img_count/6)
-
-        else:
-            cur_page = "page" + str(int(self.img_count/6)+1)
-            self.page_g.current = cur_page
-            self.page_count = int((self.img_count/6)+1)
-
-    def page_next(self):
-        if self.page_count < self.img_count/6:
-            self.page_count += 1
-            cur_page = "page" + str(self.page_count)
-            self.page_g.transition.direction = 'left'
-            self.page_g.current = cur_page
-
-    def page_prev(self):
-        if self.page_count != 1:
-            self.page_count -= 1
-            cur_page = "page" + str(self.page_count)
-            self.page_g.transition.direction = 'right'
-            self.page_g.current = cur_page
-
-class SelectScreen(MDScreen):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-
-        self.paint_instance = PainterScreen() 
-        
-        with open("./nurie/config.toml") as f:
-            data = toml.load(f)
-
-        """
-        for tag in data["data"]["tags"]:
-            print(tag)
-            for img in data["image"][tag]["images"]:
-                print(img)
-        """
-
-        self.tag_list = data["data"]["tags"]
-        self.img_list = []
-        for tag in self.tag_list:
-            self.img_list.append(data["image"][tag]["images"])
-        
-        self.link = []
-        self.link_counter = 0
-
-
-        self.select_id = self.ids.select_page
-        
-        for i in range(len(self.tag_list)):
-            print(self.tag_list[i])
-            grid = MDGridLayout(cols=3, rows=2)
-            for f in range(len(self.img_list[i])):
-
-                self.select_id.add_widget(
-                    MDCard(
-                        MDRelativeLayout(
-                            FitImage(
-                                source = "./nurie/" + self.tag_list[i] + "/preview.jpg",
-                                pos_hint = {"top": 1},
-                                radius = "12dp", 
-
-                            ),
-                            MDLabel(
-                                text = self.tag_list[i] + "\n" + self.img_list[i][f],
-                                adaptive_size=True,
-                                color = "grey",
-                            ),
-                        
-                        ),
-                        id = "./nurie/" + self.tag_list[i] + "/" + self.img_list[i][f] + ".png",
-                        style="elevated",
-                        padding="4dp",
-                        size_hint=(None, None),
-                        size = ("240dp","240dp"),
-                        ripple_behavior=True,
-                        on_press=lambda x, id=self.tag_list[i] + "/" + self.img_list[i][f] + ".png": self.move_painter_screen(id),                        
-                    )
-                )
-                self.link_counter += 1
-
-    def move_painter_screen(self,id):
-        self.manager.current = "painter"
-        print(id)
-        
-        instance_paint = PainterScreen()
-
-        time.sleep(2)
-        instance_paint.load_nurie_data(instance_paint,id)
         
 
 class MainApp(MDApp):
@@ -693,10 +495,7 @@ class MainApp(MDApp):
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette = "Olive"  # "Purple", "Red"
         sm = ScreenManager(transition=FadeTransition())
-        sm.add_widget(MenuScreen(name='main'))
-        sm.add_widget(SelectScreen(name='select'))
         sm.add_widget(PainterScreen(name='painter'))
-        sm.add_widget(GalleryScreen(name='gallery'))
         return sm
     
     def on_resume(self, *args):

@@ -13,7 +13,7 @@ def image_process(color,gray,cood,cood_hist):
 
     # 円形のマスクを作成
     mask = np.zeros((height, width), dtype=np.uint8)
-    cv2.line(mask, cood, cood_hist, 255, 10)
+    cv2.line(mask, cood, cood_hist, 255, 20)
 
     # マスクを3チャンネルに拡張（カラー画像用）
     mask_3channel = cv2.merge([mask, mask, mask])
