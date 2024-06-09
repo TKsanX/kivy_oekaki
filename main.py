@@ -225,15 +225,24 @@ class PainterScreen(MDScreen):
             pass
         else:
             if self.drawing:
-                process_texture = image_process.image_process(self.color_img, self.gray_img, touch.pos)
-                self.gray_img = process_texture
-                texture_canvas = Texture.create(size=(process_texture.shape[1], process_texture.shape[0]), colorfmt='bgr')
-                texture_canvas.blit_buffer(process_texture.tobytes(), colorfmt='bgr')
-                self.canvas.clear()
-                with self.canvas:
-                    Rectangle(texture=texture_canvas, pos=(0, 0), size=(process_texture.shape[1], process_texture.shape[0]))
-                
-                
+                try:
+                    process_texture, self.cood_hist = image_process.image_process(self.color_img, self.gray_img, touch.pos, self.cood_hist)
+                    self.gray_img = process_texture
+                    texture_canvas = Texture.create(size=(process_texture.shape[1], process_texture.shape[0]), colorfmt='bgr')
+                    texture_canvas.blit_buffer(process_texture.tobytes(), colorfmt='bgr')
+                    self.canvas.clear()
+                    with self.canvas:
+                        Rectangle(texture=texture_canvas, pos=(0, 0), size=(process_texture.shape[1], process_texture.shape[0]))
+                except:
+                    self.cood_hist = int(touch.pos[0]), int(touch.pos[1])
+                    process_texture , self.cood_hist = image_process.image_process(self.color_img, self.gray_img, touch.pos, self.cood_hist)
+                    self.gray_img = process_texture
+                    texture_canvas = Texture.create(size=(process_texture.shape[1], process_texture.shape[0]), colorfmt='bgr')
+                    texture_canvas.blit_buffer(process_texture.tobytes(), colorfmt='bgr')
+                    self.canvas.clear()
+                    with self.canvas:
+                        Rectangle(texture=texture_canvas, pos=(0, 0), size=(process_texture.shape[1], process_texture.shape[0]))
+
     def on_image1_up(self, touch):
         if write_mode == 0:
             if self.drawing:

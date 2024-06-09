@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
-def image_process(color,gray,cood):
+def image_process(color,gray,cood,cood_hist):
 
     cood = (int(cood[0]), int(cood[1]))
+    
+    
 
     height, width = gray.shape[:2]
 
@@ -11,7 +13,7 @@ def image_process(color,gray,cood):
 
     # 円形のマスクを作成
     mask = np.zeros((height, width), dtype=np.uint8)
-    cv2.circle(mask, (center_x, center_y), radius, 255, -1)
+    cv2.line(mask, cood, cood_hist, 255, 10)
 
     # マスクを3チャンネルに拡張（カラー画像用）
     mask_3channel = cv2.merge([mask, mask, mask])
@@ -20,6 +22,10 @@ def image_process(color,gray,cood):
     img2_fg = cv2.bitwise_and(color, mask_3channel)
     gray = cv2.add(img1_bg, img2_fg)
 
-    return gray
+    cv2.imwrite('test7.png', mask_3channel)
+
+    cood_hist = (int(cood[0]), int(cood[1]))
+
+    return gray,cood_hist
 
    
