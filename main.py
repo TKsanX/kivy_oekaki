@@ -26,6 +26,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.colorpicker import ColorPicker
 from kivy.uix.popup import Popup
 from kivy.core.window import Window
+from kivy.config import Config
 
 
 from copy import deepcopy
@@ -80,6 +81,8 @@ class PainterScreen(MDScreen):
         self.color_changer_count_rv = False
         self.color_change_number = []
         self.tmp_count = 0
+        Window.bind(on_motion=self.on_motion)
+
 
         
         self.float_layout = FloatLayout()
@@ -155,6 +158,12 @@ class PainterScreen(MDScreen):
         
         
         
+    def on_motion(self,*args):
+        if self.drawing:
+            if args[1] == "update":
+                pos = args[2]
+                pos = (int(pos.spos[0] * Window.width), int(pos.spos[1] * Window.height))
+                self.on_image_mouse(pos)
     
     def update_select_screen(self,id,img_list):
         print(id)
@@ -193,8 +202,6 @@ class PainterScreen(MDScreen):
             )
         
         self.float_layout.add_widget(grid)
-        
-
 
     def on_image1_down(self, touch):
         if write_mode == 0:
@@ -202,18 +209,21 @@ class PainterScreen(MDScreen):
                 self.fill(touch)
         else:
             if self.collide_point(*touch.pos):
-                self.drawing = True
+                if self.drawing == False:
+                    self.drawing = True
+                else:
+                    self.drawing = False
 
-                 
-
-    
     def on_image1_move(self, touch):
+        pass
+    
+    def on_image_mouse(self, touch):
         if write_mode == 0:
             pass
         else:
             if self.drawing:
                 try:
-                    process_texture, self.cood_hist = image_process.image_process(self.color_img, self.gray_img, touch.pos, self.cood_hist, Window)
+                    process_texture, self.cood_hist = image_process.image_process(self.color_img, self.gray_img, touch, self.cood_hist, Window)
                     self.gray_img = process_texture
                     texture_canvas = Texture.create(size=(process_texture.shape[1], process_texture.shape[0]), colorfmt='bgr')
                     texture_canvas.blit_buffer(process_texture.tobytes(), colorfmt='bgr')
@@ -221,8 +231,8 @@ class PainterScreen(MDScreen):
                     with self.canvas:
                         Rectangle(texture=texture_canvas, pos=(0, 0), size=(process_texture.shape[1], process_texture.shape[0]))
                 except:
-                    self.cood_hist = int(touch.pos[0]), int(touch.pos[1])
-                    process_texture , self.cood_hist = image_process.image_process(self.color_img, self.gray_img, touch.pos, self.cood_hist, Window)
+                    self.cood_hist = int(touch[0]), int(touch[1])
+                    process_texture , self.cood_hist = image_process.image_process(self.color_img, self.gray_img, touch, self.cood_hist, Window)
                     self.gray_img = process_texture
                     texture_canvas = Texture.create(size=(process_texture.shape[1], process_texture.shape[0]), colorfmt='bgr')
                     texture_canvas.blit_buffer(process_texture.tobytes(), colorfmt='bgr')
@@ -237,9 +247,11 @@ class PainterScreen(MDScreen):
                 self.stroke.append(touch.ud['image'])
             #print(self.image_history)
         else:
-            if self.drawing:
-                self.drawing = False
-        
+            try:
+                del self.cood_hist
+            except:
+                pass
+
     def load_nurie_data(self,id):
         
         
