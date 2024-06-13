@@ -3,6 +3,7 @@ from kivymd.uix.filemanager.filemanager import FitImage
 from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 from kivymd.uix.relativelayout import MDRelativeLayout
+from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.app import MDApp
 from kivy.lang import Builder
@@ -86,27 +87,46 @@ class PainterScreen(MDScreen):
         Window.bind(on_keyboard=self.on_keyboard)
         self.line_width = 20
 
+        self.nurie_data = []
+        self.list_nurie_page = []
         
         self.float_layout = FloatLayout()
+        self.float_layout.add_widget(
+            MDBoxLayout(
+                Button(
+                    text = '<',
+                    ),
+                MDBoxLayout(
+                    id = "page_layout",
+                    orientation="horizontal",
+                    ),
+                Button(
+                    text = '>',
+                    ),
+                orientation = 'horizontal',
+                    
+                ),
+        )
         
-        with open("./nurie/config.toml") as f:
-            data = toml.load(f)
+        self.page_id = self.ids.page_layout
+        self.nurie_sm = ScreenManager()
+        nurie_dir = "./nurie"
+        ext = (".png", ".jpg", ".jpeg",".PNG", ".JPG", ".JPEG","webp")
+        for root, dirs, files in os.walk(nurie_dir):
+            for file in files:
+                self.nurie_data.append(file)
 
-        """
-        for tag in data["data"]["tags"]:
-            print(tag)
-            for img in data["image"][tag]["images"]:
-                print(img)
-        """
+        max_img = 8
+        page_count = math.ceil(len(self.nurie_data) / max_img) + 1
+        print(page_count)
+        for i in range(page_count):
+            print(i)
 
-        self.tag_list = data["data"]["tags"]
-        self.img_list = []
-        for tag in self.tag_list:
-            self.img_list.append(data["image"][tag]["images"])
+
         
 
 
-        grid = MDGridLayout(cols=4, rows=5)
+        grid = MDGridLayout(cols=4, rows=2)
 
         for i in range(len(self.tag_list)):
             print(self.tag_list[i])
