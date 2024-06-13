@@ -91,24 +91,11 @@ class PainterScreen(MDScreen):
         self.list_nurie_page = []
         
         self.float_layout = FloatLayout()
-        self.float_layout.add_widget(
-            MDBoxLayout(
-                Button(
-                    text = '<',
-                    ),
-                MDBoxLayout(
-                    id = "page_layout",
-                    orientation="horizontal",
-                    ),
-                Button(
-                    text = '>',
-                    ),
-                orientation = 'horizontal',
-                    
-                ),
-        )
+        self.box_lay = MDBoxLayout(orientation="horizontal")
         
-        self.page_id = self.ids.page_layout
+        
+        
+        
         self.nurie_sm = ScreenManager()
         nurie_dir = "./nurie"
         ext = (".png", ".jpg", ".jpeg",".PNG", ".JPG", ".JPEG","webp")
@@ -119,66 +106,68 @@ class PainterScreen(MDScreen):
         max_img = 8
         page_count = math.ceil(len(self.nurie_data) / max_img) + 1
         print(page_count)
-        for i in range(page_count):
-            print(i)
-
-
+        for i in range(page_count-1):
+            print("nurie_page" + str(i+1))
+            self.list_nurie_page.append(MDScreen(name="nurie_page" + str(i+1)))
         
+        self.count_grid = 0
+        for i in range(page_count-1):
+            grid = MDGridLayout(cols=4, rows=2)
+            
+            for j in range(max_img):
+                try:
+                    grid.add_widget(
+                        MDCard(
+                            MDRelativeLayout(
+                                FitImage(
+                                    source = "./nurie/" + self.nurie_data[self.count_grid],
+                                    pos_hint = {"top": 1},
+                                    radius = "12dp", 
 
-
-        grid = MDGridLayout(cols=4, rows=2)
-
-        for i in range(len(self.tag_list)):
-            print(self.tag_list[i])
-
-            grid.add_widget(
-                MDCard(
-                    MDRelativeLayout(
-                        FitImage(
-                            source = "./nurie/" + self.tag_list[i] + "/preview.jpg",
-                            pos_hint = {"top": 1},
-                            radius = "12dp", 
-
-                        ),
-                        MDLabel(
-                            text = self.tag_list[i],
-                            adaptive_size=True,
-                            color = "grey",
-                        ),
-                    
-                    ),
-                    style="elevated",
-                    padding="4dp",
-                    size_hint=(1, 1),
-                    ripple_behavior=True,
-                    on_press=lambda x, tag=self.tag_list[i], list=self.img_list[i]: self.update_select_screen(tag,list),                        
-                )
-            )
+                                ),
+                                MDLabel(
+                                    text = self.nurie_data[self.count_grid],
+                                    adaptive_size=True,
+                                    color = "grey",
+                                ),
+                            
+                            ),
+                            style="elevated",
+                            padding="4dp",
+                            size_hint=(1, 1),
+                            ripple_behavior=True,
+                            on_press=lambda x, id=self.nurie_data[self.count_grid]: self.load_nurie_data(id),                        
+                        )
+                    )
+                    self.count_grid += 1
+                except:
+                    break
+            self.list_nurie_page[i].add_widget(grid)
         
-        
-        grid.add_widget(
-            MDCard(
-                
-                MDLabel(
-                    text = "back",
-                    adaptive_size=True,
-                    color = "grey",
-                ),
-                style="elevated",
-                padding="4dp",
-                size_hint=(1, 1),
-                ripple_behavior=True,
-                on_press=lambda x: self.float_layout.clear_widgets(),                        
-            )
-        )
+        for i in range(page_count-1):
+            self.nurie_sm.add_widget(self.list_nurie_page[i])
+            
+        self.box_lay.add_widget(Button(size_hint_x=  0.2,on_press=lambda x: self.nurie_page_prev()))
         
         
-        
-        self.float_layout.add_widget(grid)
+        self.box_lay.add_widget(self.nurie_sm)
+        self.box_lay.add_widget(Button(size_hint_x=  0.2, on_press=lambda x: self.nurie_page_next()))
+        self.float_layout.add_widget(self.box_lay)
         self.add_widget(self.float_layout)
 
+
         
-        
+
+
+    def nurie_page_next(self):
+        if tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) == len(self.nurie_sm.screen_names) - 1:
+            return
+        self.nurie_sm.current = "nurie_page" + str(tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) + 2)
+    
+    def nurie_page_prev(self):
+        if tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) == 0:
+            return
+        self.nurie_sm.current = "nurie_page" + str(tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current))
         
     def on_motion(self,*args):
         if self.drawing:
@@ -262,7 +251,13 @@ class PainterScreen(MDScreen):
                     self.canvas.clear()
                     with self.canvas:
                         Rectangle(texture=texture_canvas, pos=(0, 0), size=(process_texture.shape[1], process_texture.shape[0]))
+            color_hist = cv2.calcHist([self.color_img], [0], None, [256], [0, 256])
+            gray_hist = cv2.calcHist([self.gray_img], [0], None, [256], [0, 256])
 
+            
+            if cv2.compareHist(color_hist,gray_hist,0) > 0.99999999:
+                print("finish")
+                -
                 
     def on_image1_up(self, touch):
         if write_mode == 0:
@@ -282,7 +277,8 @@ class PainterScreen(MDScreen):
         self.float_layout.clear_widgets()
         
         
-        self.raw_img = "pre3.png"
+        self.raw_img = "./nurie/" + id
+        
         
         
         file = cv2.imread(self.raw_img, 1)
@@ -317,8 +313,6 @@ class PainterScreen(MDScreen):
         
         c_width = int(file.shape[1] * mag)
         c_height = int(file.shape[0] * mag)
-        
-        
         
         res_img = cv2.resize(file, dsize = (c_width, c_height))
 
