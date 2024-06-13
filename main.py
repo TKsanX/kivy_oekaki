@@ -28,7 +28,6 @@ from kivy.uix.popup import Popup
 from kivy.core.window import Window
 from kivy.config import Config
 
-
 from copy import deepcopy
 
 import image_process
@@ -45,6 +44,7 @@ import math
 import json
 import time
 import os
+import sys
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -83,7 +83,8 @@ class PainterScreen(MDScreen):
         self.color_change_number = []
         self.tmp_count = 0
         Window.bind(on_motion=self.on_motion)
-
+        Window.bind(on_keyboard=self.on_keyboard)
+        self.line_width = 20
 
         
         self.float_layout = FloatLayout()
@@ -223,8 +224,9 @@ class PainterScreen(MDScreen):
             pass
         else:
             if self.drawing:
+                
                 try:
-                    process_texture, self.cood_hist = image_process.image_process(self.color_img, self.gray_img, touch, self.cood_hist, Window)
+                    process_texture, self.cood_hist = image_process.image_process(self.color_img, self.gray_img, touch, self.cood_hist, Window, self.line_width)
                     self.gray_img = process_texture
                     texture_canvas = Texture.create(size=(process_texture.shape[1], process_texture.shape[0]), colorfmt='bgr')
                     texture_canvas.blit_buffer(process_texture.tobytes(), colorfmt='bgr')
@@ -233,7 +235,7 @@ class PainterScreen(MDScreen):
                         Rectangle(texture=texture_canvas, pos=(0, 0), size=(process_texture.shape[1], process_texture.shape[0]))
                 except:
                     self.cood_hist = int(touch[0]), int(touch[1])
-                    process_texture , self.cood_hist = image_process.image_process(self.color_img, self.gray_img, touch, self.cood_hist, Window)
+                    process_texture , self.cood_hist = image_process.image_process(self.color_img, self.gray_img, touch, self.cood_hist, Window, self.line_width)   
                     self.gray_img = process_texture
                     texture_canvas = Texture.create(size=(process_texture.shape[1], process_texture.shape[0]), colorfmt='bgr')
                     texture_canvas.blit_buffer(process_texture.tobytes(), colorfmt='bgr')
@@ -241,6 +243,7 @@ class PainterScreen(MDScreen):
                     with self.canvas:
                         Rectangle(texture=texture_canvas, pos=(0, 0), size=(process_texture.shape[1], process_texture.shape[0]))
 
+                
     def on_image1_up(self, touch):
         if write_mode == 0:
             if self.drawing:
@@ -259,7 +262,7 @@ class PainterScreen(MDScreen):
         self.float_layout.clear_widgets()
         
         
-        self.raw_img = "waif.png"
+        self.raw_img = "pre3.png"
         
         
         file = cv2.imread(self.raw_img, 1)
@@ -357,6 +360,15 @@ class PainterScreen(MDScreen):
         self.load_state = True
         
         
+    def on_keyboard(self, instance, key, scancode, codepoint, modifiers):
+        print(key)
+        if key == 273:
+            if self.line_width < 50:
+                self.line_width += 1
+        elif key == 274:
+            if self.line_width > 2:
+                self.line_width -= 1
+
 
 class MainApp(MDApp):
     def build(self):
