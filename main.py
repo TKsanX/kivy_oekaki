@@ -259,7 +259,7 @@ class PainterScreen(MDScreen):
         self.float_layout.clear_widgets()
         
         
-        self.raw_img = "pre.png"
+        self.raw_img = "waif.png"
         
         
         file = cv2.imread(self.raw_img, 1)
@@ -290,9 +290,10 @@ class PainterScreen(MDScreen):
         else:
             mag = mag_width
             aspect_mode = "width"
-            
+        
+        
         c_width = int(file.shape[1] * mag)
-
+        c_height = int(file.shape[0] * mag)
         
         
         
@@ -309,9 +310,12 @@ class PainterScreen(MDScreen):
 
         full_img = np.full((Window.height, Window.width),255, dtype=np.uint8)
         full_img = np.stack((full_img,)*3, axis=-1)
-        
-        dx = width_while   # 横方向の移動距離
-        dy = 0    # 縦方向の移動距離
+        if aspect_mode == "height":
+            dx = width_while   # 横方向の移動距離
+            dy = 0    # 縦方向の移動距離
+        else:
+            dx = 0
+            dy = height_while
         h, w = self.gray_img.shape[:2]
         full_img[dy:dy+h, dx:dx+w] = self.gray_img
         
@@ -324,8 +328,7 @@ class PainterScreen(MDScreen):
         full_img = np.full((Window.height, Window.width),255, dtype=np.uint8)
         full_img = np.stack((full_img,)*3, axis=-1)
         
-        dx = width_while  # 横方向の移動距離
-        dy = 0    # 縦方向の移動距離
+
         
         h, w = self.gray_img.shape[:2]
         full_img[dy:dy+h, dx:dx+w] = self.gray_img
@@ -334,8 +337,12 @@ class PainterScreen(MDScreen):
         
         full_img = np.full((Window.height, Window.width),255, dtype=np.uint8)
         full_img = np.stack((full_img,)*3, axis=-1)
-        dx = width_while   # 横方向の移動距離
-        dy = 0    # 縦方向の移動距離
+        if aspect_mode == "height":
+            dx = width_while   # 横方向の移動距離
+            dy = 0    # 縦方向の移動距離
+        else:
+            dx = 0
+            dy = height_while
         h, w = self.color_img.shape[:2]
         full_img[dy:dy+h, dx:dx+w] = self.color_img
         self.color_img = full_img
