@@ -32,6 +32,7 @@ from kivy.config import Config
 from copy import deepcopy
 
 import image_process
+import img_processor
 
 import toml
 
@@ -258,7 +259,7 @@ class PainterScreen(MDScreen):
         self.float_layout.clear_widgets()
         
         
-        self.raw_img = "preview.jpg"
+        self.raw_img = "pre.png"
         
         
         file = cv2.imread(self.raw_img, 1)
@@ -285,8 +286,11 @@ class PainterScreen(MDScreen):
         
         if mag_height < mag_width:
             mag = mag_height
+            aspect_mode = "height"
         else:
             mag = mag_width
+            aspect_mode = "width"
+            
         c_width = int(file.shape[1] * mag)
 
         
@@ -295,10 +299,13 @@ class PainterScreen(MDScreen):
         res_img = cv2.resize(file, dsize = (c_width, c_height))
 
         self.color_img = res_img
-        self.gray_img = cv2.cvtColor(res_img, cv2.COLOR_BGR2GRAY)
+        
+        self.gray_img = img_processor.img_prosessor(self.raw_img)
         self.gray_img = np.stack((self.gray_img,)*3, axis=-1)
+        self.gray_img = cv2.resize(self.gray_img, dsize = (c_width, c_height))
 
         width_while = (int(Window.width/2 - self.gray_img.shape[1]/2))
+        height_while = (int(Window.height/2 - self.gray_img.shape[0]/2))
 
         full_img = np.full((Window.height, Window.width),255, dtype=np.uint8)
         full_img = np.stack((full_img,)*3, axis=-1)
@@ -316,8 +323,10 @@ class PainterScreen(MDScreen):
 
         full_img = np.full((Window.height, Window.width),255, dtype=np.uint8)
         full_img = np.stack((full_img,)*3, axis=-1)
+        
         dx = width_while  # 横方向の移動距離
         dy = 0    # 縦方向の移動距離
+        
         h, w = self.gray_img.shape[:2]
         full_img[dy:dy+h, dx:dx+w] = self.gray_img
         self.gray_img = full_img

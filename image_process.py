@@ -6,13 +6,7 @@ import numpy as np
 def image_process(color,gray,cood,cood_hist,Window):
 
     cood = (int(cood[0]), int(cood[1]))
-    
-    
 
-    height, width = gray.shape[:2]
-
-    center_x, center_y = cood[0], cood[1]  # 画像の中心
-    radius = 20  # 円の半径
 
     # 円形のマスクを作成
     mask = np.zeros((Window.height, Window.width), dtype=np.uint8)
