@@ -389,6 +389,8 @@ class PainterScreen(MDScreen):
         self.color_picker = (0.51171875, 0.99609375, 0.99609375, 1)
     def color_change_19(self):
         self.color_picker = (0.51171875, 0.51171875, 0.99609375, 1)
+    def color_change_20(self):
+        self.color_picker = (1, 1, 1, 1)
     
     def change_color(self):
         print(self.color_picker)
