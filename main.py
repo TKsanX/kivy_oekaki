@@ -257,7 +257,7 @@ class PainterScreen(MDScreen):
             
             if cv2.compareHist(color_hist,gray_hist,0) > 0.99999999:
                 print("finish")
-                -
+                
                 
     def on_image1_up(self, touch):
         if write_mode == 0:
