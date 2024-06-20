@@ -32,6 +32,7 @@ from copy import deepcopy
 import toml
 
 import kivymd.icon_definitions
+import img_processor
 
 import gc
 import cv2
@@ -613,7 +614,7 @@ class PainterScreen(MDScreen):
         
         raw_img = "nurie/" + id
         
-        file = cv2.imread(raw_img, 0)
+        file = img_processor.img_prosessor(raw_img)
         cv2.imwrite('tempp.png', file)
 
         threshold = 200
