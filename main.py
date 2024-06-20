@@ -160,8 +160,16 @@ class PainterScreen(MDScreen):
         self.add_widget(self.float_layout)
 
 
-        
-        
+    def nurie_page_next(self):
+        if tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) == len(self.nurie_sm.screen_names) - 1:
+            return
+        self.nurie_sm.current = "nurie_page" + str(tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) + 2)
+    
+    def nurie_page_prev(self):
+        if tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) == 0:
+            return
+        self.nurie_sm.current = "nurie_page" + str(tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current))
+    
         
     
     def update_select_screen(self,id,img_list):
@@ -261,7 +269,6 @@ class PainterScreen(MDScreen):
         print(color_picker_255)
         
         
-        color_value = bgr_array[int(fix_y), int(x)]
         
         cv2.floodFill(bgr_array,None , (int(x), int(fix_y)), color_picker_255)
 
