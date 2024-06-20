@@ -57,6 +57,8 @@ gl_save_count = 0
 #! 1:描画モード
 write_mode = 0
 
+load_mode = 0
+
 def tag_index_find(l, x):
     return l.index(x) if x in l else -1
 
@@ -613,8 +615,11 @@ class PainterScreen(MDScreen):
         self.float_layout.clear_widgets()
         
         raw_img = "nurie/" + id
-        
-        file = img_processor.img_prosessor(raw_img)
+        if load_mode == 0:
+            file = img_processor.img_prosessor(raw_img)
+        elif load_mode == 1:
+            file = cv2.imread(raw_img)
+
         cv2.imwrite('tempp.png', file)
 
         threshold = 200
