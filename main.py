@@ -4,6 +4,7 @@ from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 from kivymd.uix.relativelayout import MDRelativeLayout
 from kivymd.uix.floatlayout import MDFloatLayout
+from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivymd.uix.screenmanager import ScreenManager #, Screen
@@ -91,74 +92,70 @@ class PainterScreen(MDScreen):
 
         
         self.float_layout = FloatLayout()
-        
-        with open("./nurie/config.toml") as f:
-            data = toml.load(f)
-
-        """
-        for tag in data["data"]["tags"]:
-            print(tag)
-            for img in data["image"][tag]["images"]:
-                print(img)
-        """
-
-        self.tag_list = data["data"]["tags"]
-        self.img_list = []
-        for tag in self.tag_list:
-            self.img_list.append(data["image"][tag]["images"])
-        
-
-
-        grid = MDGridLayout(cols=4, rows=5)
-
-        for i in range(len(self.tag_list)):
-            print(self.tag_list[i])
-
-            grid.add_widget(
-                MDCard(
-                    MDRelativeLayout(
-                        FitImage(
-                            source = "./nurie/" + self.tag_list[i] + "/preview.jpg",
-                            pos_hint = {"top": 1},
-                            radius = "12dp", 
-
-                        ),
-                        MDLabel(
-                            text = self.tag_list[i],
-                            adaptive_size=True,
-                            color = "grey",
-                        ),
-                    
-                    ),
-                    style="elevated",
-                    padding="4dp",
-                    size_hint=(1, 1),
-                    ripple_behavior=True,
-                    on_press=lambda x, tag=self.tag_list[i], list=self.img_list[i]: self.update_select_screen(tag,list),                        
-                )
-            )
-        
-        
-        grid.add_widget(
-            MDCard(
-                
-                MDLabel(
-                    text = "back",
-                    adaptive_size=True,
-                    color = "grey",
-                ),
-                style="elevated",
-                padding="4dp",
-                size_hint=(1, 1),
-                ripple_behavior=True,
-                on_press=lambda x: self.float_layout.clear_widgets(),                        
-            )
-        )
+        self.box_lay = MDBoxLayout(orientation="horizontal")
         
         
         
-        self.float_layout.add_widget(grid)
+        
+        self.nurie_sm = ScreenManager()
+        nurie_dir = "./nurie"
+        ext = (".png", ".jpg", ".jpeg",".PNG", ".JPG", ".JPEG","webp")
+        for root, dirs, files in os.walk(nurie_dir):
+            for file in files:
+                self.nurie_data.append(file)
+
+        max_img = 8
+        page_count = math.ceil(len(self.nurie_data) / max_img) + 1
+        print(page_count)
+        for i in range(page_count-1):
+            print("nurie_page" + str(i+1))
+            self.list_nurie_page.append(MDScreen(name="nurie_page" + str(i+1)))
+        
+        self.count_grid = 0
+        for i in range(page_count-1):
+            grid = MDGridLayout(cols=4, rows=2)
+            
+            for j in range(max_img):
+                try:
+                    grid.add_widget(
+                        MDCard(
+                            MDRelativeLayout(
+                                FitImage(
+                                    source = "./nurie/" + self.nurie_data[self.count_grid],
+                                    pos_hint = {"top": 1},
+                                    radius = "12dp", 
+
+                                ),
+                                MDLabel(
+                                    text = self.nurie_data[self.count_grid],
+                                    adaptive_size=True,
+                                    color = "grey",
+                                ),
+                            
+                            ),
+                            style="elevated",
+                            padding="4dp",
+                            size_hint=(1, 1),
+                            ripple_behavior=True,
+                            on_press=lambda x, id=self.nurie_data[self.count_grid]: self.load_nurie_data(id),                        
+                        )
+                    )
+                    self.count_grid += 1
+                except:
+                    break
+            self.list_nurie_page[i].add_widget(grid)
+        
+        for i in range(page_count-1):
+            self.nurie_sm.add_widget(self.list_nurie_page[i])
+            
+        self.box_lay.add_widget(Button(size_hint_x=  0.2,on_press=lambda x: self.nurie_page_prev()))
+        
+        
+        self.box_lay.add_widget(self.nurie_sm)
+        self.box_lay.add_widget(Button(size_hint_x=  0.2, on_press=lambda x: self.nurie_page_next()))
+        self.float_layout.add_widget(self.box_lay)
         self.add_widget(self.float_layout)
+
 
         
         
