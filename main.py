@@ -89,6 +89,9 @@ class PainterScreen(MDScreen):
         self.color_changer_count_rv = False
         self.color_change_number = []
         self.tmp_count = 0
+        
+        self.nurie_data = []
+        self.list_nurie_page = []
 
         
         self.float_layout = FloatLayout()
