@@ -57,7 +57,7 @@ gl_save_count = 0
 #! 1:描画モード
 write_mode = 0
 
-load_mode = 0
+load_mode = 1
 
 def tag_index_find(l, x):
     return l.index(x) if x in l else -1
@@ -839,7 +839,6 @@ class SelectScreen(MDScreen):
                                 source = "./nurie/" + self.tag_list[i] + "/preview.jpg",
                                 pos_hint = {"top": 1},
                                 radius = "12dp", 
-
                             ),
                             MDLabel(
                                 text = self.tag_list[i] + "\n" + self.img_list[i][f],
