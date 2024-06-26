@@ -148,7 +148,7 @@ ScreenManager:
                 id: clr_btn16
                 on_press: root.color_change_16()
             Button:
-                background_color: 0, 0.75, 0.75, 1
+                background_color: 0.996078431372549,0.8823529411764706, 0.8666666666666667, 1
                 background_normal: ''
                 id: clr_btn17
                 on_press: root.color_change_17()
@@ -163,10 +163,9 @@ ScreenManager:
                 id: clr_btn19
                 on_press: root.color_change_19()
             Button:
-                background_color: 1, 1, 1, 1
-                background_normal: ''
-                id: clr_btn20
-                on_press: root.color_change_20()
+                text: 'もどす'
+                font_size: '40pt'
+                on_press: root.canvas_undo()
 
 
 <GalleryScreen>:

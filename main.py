@@ -41,6 +41,8 @@ import math
 import json
 import time
 import os
+import sys
+import subprocess
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -195,11 +197,13 @@ class PainterScreen(MDScreen):
     def nurie_page_next(self):
         if tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) == len(self.nurie_sm.screen_names) - 1:
             return
+        self.nurie_sm.transition.direction = 'left'
         self.nurie_sm.current = "nurie_page" + str(tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) + 2)
     
     def nurie_page_prev(self):
         if tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) == 0:
             return
+        self.nurie_sm.transition.direction = 'right'
         self.nurie_sm.current = "nurie_page" + str(tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current))
     
         
@@ -423,7 +427,7 @@ class PainterScreen(MDScreen):
     def color_change_16(self):
         self.color_picker = (0.75, 1, 0, 1)
     def color_change_17(self):
-        self.color_picker = (0, 0.75, 0.75, 1)
+        self.color_picker = (0.996078431372549,0.8823529411764706, 0.8666666666666667, 1)
     def color_change_18(self):
         self.color_picker =  (1, 0.5, 0.5, 1)
     def color_change_19(self):
