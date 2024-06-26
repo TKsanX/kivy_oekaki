@@ -123,6 +123,8 @@ class PainterScreen(MDScreen):
         self.color_changer_count_rv = False
         self.color_change_number = []
         self.tmp_count = 0
+        Window.bind(on_keyboard=self.on_keyboard)
+
         
         self.nurie_data = []
         self.list_nurie_page = []
@@ -185,15 +187,22 @@ class PainterScreen(MDScreen):
         for i in range(page_count-1):
             self.nurie_sm.add_widget(self.list_nurie_page[i])
             
-        self.box_lay.add_widget(Button(size_hint_x=  0.2,on_press=lambda x: self.nurie_page_prev()))
+        self.box_lay.add_widget(Button(size_hint_x=  0.2, text="<", font_size="40pt",on_press=lambda x: self.nurie_page_prev()))
         
         
         self.box_lay.add_widget(self.nurie_sm)
-        self.box_lay.add_widget(Button(size_hint_x=  0.2, on_press=lambda x: self.nurie_page_next()))
+        self.box_lay.add_widget(Button(size_hint_x=  0.2, text=">", font_size="40pt",on_press=lambda x: self.nurie_page_next()))
         self.float_layout.add_widget(self.box_lay)
         self.add_widget(self.float_layout)
 
-
+    def on_keyboard(self, instance, key, scancode, codepoint, modifiers):
+        print(key)
+        if key == 114:
+            subprocess.Popen([sys.executable] + sys.argv)
+            sys.exit()
+            
+    
+    
     def nurie_page_next(self):
         if tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) == len(self.nurie_sm.screen_names) - 1:
             return
