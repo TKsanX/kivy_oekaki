@@ -47,6 +47,32 @@ from PIL.PngImagePlugin import PngInfo
 
 from kivy.uix.button import Button
 
+from kivy.core.text import LabelBase, DEFAULT_FONT
+from kivy.resources import resource_add_path
+from kivy.utils import platform
+
+Window.size = (int(Window.width), int(Window.height))
+
+
+font_path = os.path.join(os.path.dirname(__file__), "font.ttf")
+resource_add_path(os.path.dirname(font_path))
+LabelBase.register(DEFAULT_FONT, font_path)
+
+import tkinter as tk
+
+root = tk.Tk()
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+root.destroy()
+
+
+
+from kivy.config import Config
+
+Window.size = (screen_width, screen_height)
+Window.fullscreen = True
+
+
 COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
 
 color_picker = (0, 0, 0, 1)
@@ -57,6 +83,9 @@ gl_save_count = 0
 #! 1:描画モード
 write_mode = 0
 
+#! デバッグ用モード切替
+#! 0:カツニキモード
+#! 1:通常読み込みモード
 load_mode = 1
 
 def tag_index_find(l, x):
@@ -364,41 +393,41 @@ class PainterScreen(MDScreen):
     def color_change_1(self):
         self.color_picker = (1, 0, 0, 1)
     def color_change_2(self):
-        self.color_picker = (0, 1, 0, 1)
+        self.color_picker = (0, 0, 1, 1)
     def color_change_3(self):
-        self.color_picker = (0, 0, 1, 1)
+        self.color_picker = (1, 1, 0, 1)
     def color_change_4(self):
-        self.color_picker = (0.51171875, 0.703125, 0.99609375, 1)
-    def color_change_5(self):
-        self.color_picker = (0.99609375, 0.703125, 0.51171875, 1)
-    def color_change_6(self):
-        self.color_picker = (0.99609375, 0.99609375, 0.51171875, 1)
-    def color_change_7(self):
-        self.color_picker = (0.51171875, 0.99609375, 0.51171875, 1)
-    def color_change_8(self):
-        self.color_picker = (0.51171875, 0.99609375, 0.99609375, 1)
-    def color_change_9(self):
-        self.color_picker = (0.51171875, 0.51171875, 0.99609375, 1)
-    def color_change_10(self):
-        self.color_picker = (0.99609375, 0.51171875, 0.99609375, 1)
-    def color_change_11(self):
-        self.color_picker = (1, 0, 0, 1)
-    def color_change_12(self):
         self.color_picker = (0, 1, 0, 1)
+    def color_change_5(self):
+        self.color_picker = (1, 0.5, 0, 1)
+    def color_change_6(self):
+        self.color_picker = (0.5, 0, 0.5, 1)
+    def color_change_7(self):
+        self.color_picker = (1, 0.75, 0.8, 1)
+    def color_change_8(self):
+        self.color_picker = (0, 1, 1, 1)
+    def color_change_9(self):
+        self.color_picker = (0.6, 0.3, 0, 1)
+    def color_change_10(self):
+        self.color_picker = (0, 0, 0, 1)
+    def color_change_11(self):
+        self.color_picker = (1, 1, 1, 1)
+    def color_change_12(self):
+        self.color_picker = (0.5, 0.5, 0.5, 1)
     def color_change_13(self):
-        self.color_picker = (0, 0, 1, 1)
+        self.color_picker = (0.5, 1, 0.5, 1)
     def color_change_14(self):
-        self.color_picker = (0.51171875, 0.703125, 0.99609375, 1)
+        self.color_picker = (0, 0, 0.5, 1)
     def color_change_15(self):
-        self.color_picker = (0.99609375, 0.703125, 0.51171875, 1)
+        self.color_picker = (1, 0, 1, 1)
     def color_change_16(self):
-        self.color_picker = (0.99609375, 0.99609375, 0.51171875, 1)
+        self.color_picker = (0.75, 1, 0, 1)
     def color_change_17(self):
-        self.color_picker = (0.51171875, 0.99609375, 0.51171875, 1)
+        self.color_picker = (0, 0.75, 0.75, 1)
     def color_change_18(self):
-        self.color_picker = (0.51171875, 0.99609375, 0.99609375, 1)
+        self.color_picker =  (1, 0.5, 0.5, 1)
     def color_change_19(self):
-        self.color_picker = (0.51171875, 0.51171875, 0.99609375, 1)
+        self.color_picker = (0.75, 0.5, 1, 1)
     def color_change_20(self):
         self.color_picker = (1, 1, 1, 1)
     
@@ -619,8 +648,19 @@ class PainterScreen(MDScreen):
             file = img_processor.img_prosessor(raw_img)
         elif load_mode == 1:
             file = cv2.imread(raw_img)
+            
+        
 
         cv2.imwrite('tempp.png', file)
+        
+        gray = cv2.cvtColor(file, cv2.COLOR_BGR2GRAY)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        #白と黒を反転
+        binary = cv2.bitwise_not(binary)
+        
+        #グレースケール画像を3チャンネルに変換
+        
+        file = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
 
         threshold = 200
         
@@ -635,7 +675,7 @@ class PainterScreen(MDScreen):
         print("c_height:" + str(c_height))
         
         try:
-            print(str(file.shape[0])) # 縦
+            print("db4" + str(file.shape[0])) # 縦
             print(str(file.shape[1])) # 横
         except:
             return
@@ -650,10 +690,16 @@ class PainterScreen(MDScreen):
          
         
         res_img = cv2.resize(file, dsize = (c_width, c_height))
-        print("res:" + str(c_height) + " " + str(c_width))
+        print("res:" + str(res_img.shape))
 
         ret, img_thresh = cv2.threshold(res_img, threshold, 255, cv2.THRESH_BINARY)
         img_thresh = np.where(img_thresh == (0), (40), (255))
+
+        
+        
+        
+        
+        
 
         
         cv2.imwrite('nurie.png', img_thresh)
@@ -666,8 +712,8 @@ class PainterScreen(MDScreen):
         with self.canvas:
             Rectangle(texture=cv_image, pos=(0, 0), size=(c_width, c_height))
         
-        width_canvas = self.ids.main_canvas.width 
-        hight_root = self.height
+        width_canvas = int(self.ids.main_canvas.width) 
+        hight_root = int(self.height)
 
         print("debud1:" + str(width_canvas))
 
@@ -872,6 +918,7 @@ class MainApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette = "Olive"  # "Purple", "Red"
+        self.title = "ぬりえくん"
         sm = ScreenManager(transition=FadeTransition())
         #sm.add_widget(MenuScreen(name='main'))
         #sm.add_widget(SelectScreen(name='select'))

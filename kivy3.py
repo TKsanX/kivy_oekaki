@@ -1,17 +1,13 @@
-from kivymd.app import MDApp
-from kivymd.uix.button import MDButton, MDButtonIcon, MDButtonText
-from kivymd.uix.screen import MDScreen
-from kivy.uix.button import Button
+import cv2
 
 
-class Example(MDApp):
-    def build(self):
-        self.theme_cls.primary_palette = "Green"
-        btn1 = Button(text='Hello world 1')
-        btn1.bind(on_press=callback)
-        btn2 = Button(text='Hello world 2')
-        btn2.bind(on_press=callback)
-        def callback(instance):
-            print('The button <%s> is being pressed' % instance.text)
+# 画像の読み込み
+img = cv2.imread('./nurie/komuyuki.png')
+# 2値化
 
-Example().run()
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+_, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+#白と黒を反転
+binary = cv2.bitwise_not(binary)
+# が慈雨の保存
+cv2.imwrite('./nurie/komuyuki_binary.png', binary)
