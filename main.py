@@ -31,6 +31,9 @@ from kivy.config import Config
 
 from copy import deepcopy
 
+import sys
+import subprocess
+
 import image_process
 import img_processor
 
@@ -51,6 +54,10 @@ from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
 from kivy.uix.button import Button
+
+
+
+
 
 COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
 
