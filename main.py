@@ -55,7 +55,28 @@ from PIL.PngImagePlugin import PngInfo
 
 from kivy.uix.button import Button
 
+from kivy.core.text import LabelBase, DEFAULT_FONT
+from kivy.resources import resource_add_path
+from kivy.utils import platform
+import os
 
+font_path = os.path.join(os.path.dirname(__file__), "font.ttf")
+resource_add_path(os.path.dirname(font_path))
+LabelBase.register(DEFAULT_FONT, font_path)
+
+import tkinter as tk
+
+root = tk.Tk()
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+root.destroy()
+
+
+
+from kivy.config import Config
+
+Window.size = (screen_width, screen_height)
+Window.fullscreen = True
 
 
 
@@ -90,9 +111,10 @@ class PainterScreen(MDScreen):
         self.color_changer_count_rv = False
         self.color_change_number = []
         self.tmp_count = 0
+        self.finished = False
         Window.bind(on_motion=self.on_motion)
         Window.bind(on_keyboard=self.on_keyboard)
-        self.line_width = 20
+        self.line_width = 49
 
         self.nurie_data = []
         self.list_nurie_page = []
@@ -110,7 +132,7 @@ class PainterScreen(MDScreen):
             for file in files:
                 self.nurie_data.append(file)
 
-        max_img = 8
+        max_img = 6
         page_count = math.ceil(len(self.nurie_data) / max_img) + 1
         print(page_count)
         for i in range(page_count-1):
@@ -119,7 +141,7 @@ class PainterScreen(MDScreen):
         
         self.count_grid = 0
         for i in range(page_count-1):
-            grid = MDGridLayout(cols=4, rows=2)
+            grid = MDGridLayout(cols=3, rows=2)
             
             for j in range(max_img):
                 try:
@@ -154,11 +176,11 @@ class PainterScreen(MDScreen):
         for i in range(page_count-1):
             self.nurie_sm.add_widget(self.list_nurie_page[i])
             
-        self.box_lay.add_widget(Button(size_hint_x=  0.2,on_press=lambda x: self.nurie_page_prev()))
+        self.box_lay.add_widget(Button(size_hint_x=  0.2, text="<", font_size="40pt",on_press=lambda x: self.nurie_page_prev()))
         
         
         self.box_lay.add_widget(self.nurie_sm)
-        self.box_lay.add_widget(Button(size_hint_x=  0.2, on_press=lambda x: self.nurie_page_next()))
+        self.box_lay.add_widget(Button(size_hint_x=  0.2, text=">", font_size="40pt",on_press=lambda x: self.nurie_page_next()))
         self.float_layout.add_widget(self.box_lay)
         self.add_widget(self.float_layout)
 
@@ -261,10 +283,14 @@ class PainterScreen(MDScreen):
             color_hist = cv2.calcHist([self.color_img], [0], None, [256], [0, 256])
             gray_hist = cv2.calcHist([self.gray_img], [0], None, [256], [0, 256])
 
-            
-            if cv2.compareHist(color_hist,gray_hist,0) > 0.99999999:
-                print("finish")
-                
+            if self.finished == False:
+                if cv2.compareHist(color_hist,gray_hist,0) > 0.99999999:
+                    self.finished = True
+                    print("finish")
+                    float_layout = FloatLayout()
+                    float_layout.add_widget(Button(size_hint=(0.3, 0.2), text="かんせい！！", font_size="60pt",on_press=lambda x: float_layout.clear_widgets()))
+                    self.add_widget(float_layout)
+                    self.drawing = False
                 
     def on_image1_up(self, touch):
         if write_mode == 0:
@@ -389,6 +415,9 @@ class PainterScreen(MDScreen):
         elif key == 274:
             if self.line_width > 2:
                 self.line_width -= 1
+        elif key == 114:
+            subprocess.Popen([sys.executable] + sys.argv)
+            sys.exit()
 
 
 class MainApp(MDApp):
