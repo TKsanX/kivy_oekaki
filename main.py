@@ -82,6 +82,8 @@ Window.fullscreen = True
 
 COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
 
+RESTERT_SAVER = False
+
 color_picker = (0, 0, 0, 1)
 gl_save_count = 0
 
@@ -409,6 +411,7 @@ class PainterScreen(MDScreen):
         
     def on_keyboard(self, instance, key, scancode, codepoint, modifiers):
         print(key)
+        global RESTERT_SAVER
         if key == 273:
             if self.line_width < 50:
                 self.line_width += 1
@@ -416,9 +419,12 @@ class PainterScreen(MDScreen):
             if self.line_width > 2:
                 self.line_width -= 1
         elif key == 114:
-            subprocess.Popen([sys.executable] + sys.argv)
-            sys.exit()
-
+            if RESTERT_SAVER == False:
+                RESTERT_SAVER = True
+                subprocess.Popen([sys.executable] + sys.argv)
+                sys.exit()
+                
+            
 
 class MainApp(MDApp):
     def build(self):
