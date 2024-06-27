@@ -22,7 +22,6 @@ from kivy.core.image import Image as CoreImage
 import os, tkinter, tkinter.filedialog, tkinter.messagebox
 import pickle
 import bz2
-from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.colorpicker import ColorPicker
 from kivy.uix.popup import Popup
@@ -53,7 +52,6 @@ from kivy.core.text import LabelBase, DEFAULT_FONT
 from kivy.resources import resource_add_path
 from kivy.utils import platform
 
-Window.size = (int(Window.width), int(Window.height))
 
 
 font_path = os.path.join(os.path.dirname(__file__), "font.ttf")
@@ -68,8 +66,9 @@ screen_height = root.winfo_screenheight()
 root.destroy()
 
 
-
 from kivy.config import Config
+from kivy.core.window import Window
+
 
 Window.size = (screen_width, screen_height)
 Window.fullscreen = True
@@ -79,6 +78,8 @@ COLOR_PICKER_GLOBAL = (0, 0, 0, 1)
 
 color_picker = (0, 0, 0, 1)
 gl_save_count = 0
+
+RESTART_SAVER = False
 
 #! デバッグ用モード切替
 #! 0:塗りつぶしモード
@@ -197,9 +198,12 @@ class PainterScreen(MDScreen):
 
     def on_keyboard(self, instance, key, scancode, codepoint, modifiers):
         print(key)
+        global RESTART_SAVER
         if key == 114:
-            subprocess.Popen([sys.executable] + sys.argv)
-            sys.exit()
+            if RESTART_SAVER == False:
+                subprocess.Popen([sys.executable] + sys.argv)
+                sys.exit()
+                RESTART_SAVER = True
             
     
     
@@ -663,7 +667,7 @@ class PainterScreen(MDScreen):
             file = cv2.imread(raw_img)
             
         
-
+        cv2.imwrite('test.png', file)
         cv2.imwrite('tempp.png', file)
         
         gray = cv2.cvtColor(file, cv2.COLOR_BGR2GRAY)
