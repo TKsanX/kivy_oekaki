@@ -201,9 +201,10 @@ class PainterScreen(MDScreen):
         global RESTART_SAVER
         if key == 114:
             if RESTART_SAVER == False:
+                RESTART_SAVER = True
                 subprocess.Popen([sys.executable] + sys.argv)
                 sys.exit()
-                RESTART_SAVER = True
+                
             
     
     
