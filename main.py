@@ -116,7 +116,7 @@ class PainterScreen(MDScreen):
         self.finished = False
         Window.bind(on_motion=self.on_motion)
         Window.bind(on_keyboard=self.on_keyboard)
-        self.line_width = 49
+        self.line_width = 80
 
         self.nurie_data = []
         self.list_nurie_page = []
@@ -193,12 +193,13 @@ class PainterScreen(MDScreen):
     def nurie_page_next(self):
         if tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) == len(self.nurie_sm.screen_names) - 1:
             return
+        self.nurie_sm.transition.direction = 'left'
         self.nurie_sm.current = "nurie_page" + str(tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) + 2)
     
     def nurie_page_prev(self):
         if tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) == 0:
             return
-    
+        self.nurie_sm.transition.direction = 'right'
         self.nurie_sm.current = "nurie_page" + str(tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current))
         
     def on_motion(self,*args):
@@ -291,7 +292,7 @@ class PainterScreen(MDScreen):
                     self.finished = True
                     print("finish")
                     float_layout = FloatLayout()
-                    float_layout.add_widget(Button(size_hint=(0.3, 0.2), text="かんせい！！", font_size="60pt",on_press=lambda x: float_layout.clear_widgets()))
+                    float_layout.add_widget(Button(size_hint=(0.3, 0.2), text="かんせい！！", font_size="40pt",on_press=lambda x: float_layout.clear_widgets()))
                     self.add_widget(float_layout)
                     self.drawing = False
                 
@@ -414,7 +415,7 @@ class PainterScreen(MDScreen):
         print(key)
         global RESTERT_SAVER
         if key == 273:
-            if self.line_width < 50:
+            if self.line_width < 100:
                 self.line_width += 1
         elif key == 274:
             if self.line_width > 2:

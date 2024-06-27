@@ -1,3 +1,4 @@
+from kivy_deps import sdl2, glew
 # -*- mode: python ; coding: utf-8 -*-
 
 
@@ -37,6 +38,7 @@ coll = COLLECT(
     exe,
     a.binaries,
     a.datas,
+    *[Tree(p) for p in (sdl2.dep_bins + glew.dep_bins)],
     strip=False,
     upx=True,
     upx_exclude=[],
