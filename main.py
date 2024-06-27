@@ -198,6 +198,7 @@ class PainterScreen(MDScreen):
     def nurie_page_prev(self):
         if tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current) == 0:
             return
+    
         self.nurie_sm.current = "nurie_page" + str(tag_index_find(self.nurie_sm.screen_names, self.nurie_sm.current))
         
     def on_motion(self,*args):
